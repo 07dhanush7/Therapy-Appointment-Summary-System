@@ -309,29 +309,6 @@ const TherapistDetails = () => {
             }}>
               💼 {therapist.experienceYears} Years Exp
             </span>
-            <span style={{
-              display: 'inline-block',
-              fontSize: '0.82rem',
-              color: 'var(--text-secondary)',
-              padding: '4px 10px',
-              background: 'rgba(92, 114, 96, 0.04)',
-              border: '1px solid rgba(92, 114, 96, 0.1)',
-              borderRadius: 'var(--radius-sm)'
-            }}>
-              📍 {therapist.location}
-            </span>
-            <span style={{
-              display: 'inline-block',
-              fontSize: '0.82rem',
-              background: therapist.availabilityStatus === 'Available Today' ? 'rgba(57, 109, 78, 0.1)' : (therapist.availabilityStatus === 'Available Tomorrow' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(156, 163, 175, 0.1)'),
-              color: therapist.availabilityStatus === 'Available Today' ? 'var(--accent-emerald)' : (therapist.availabilityStatus === 'Available Tomorrow' ? 'rgb(217, 119, 6)' : 'rgb(107, 114, 128)'),
-              padding: '4px 10px',
-              borderRadius: 'var(--radius-sm)',
-              fontWeight: 600,
-              border: therapist.availabilityStatus === 'Available Today' ? '1px solid rgba(57, 109, 78, 0.2)' : (therapist.availabilityStatus === 'Available Tomorrow' ? '1px solid rgba(245, 158, 11, 0.2)' : '1px solid rgba(156, 163, 175, 0.2)')
-            }}>
-              🕒 {therapist.availabilityStatus}
-            </span>
           </div>
           <p style={{
             fontSize: '0.92rem',
