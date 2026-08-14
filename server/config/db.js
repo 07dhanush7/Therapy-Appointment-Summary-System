@@ -7,6 +7,13 @@ const dbConfig = {
   password: process.env.DB_PASSWORD === 'YOUR_PASSWORD' ? '' : (process.env.DB_PASSWORD || '')
 };
 
+// Enable SSL/TLS only for remote database hosts (e.g. TiDB Cloud) to prevent local MySQL connection failures
+const isLocal = dbConfig.host === 'localhost' || dbConfig.host === '127.0.0.1';
+const sslConfig = isLocal ? null : {
+  minVersion: 'TLSv1.2',
+  rejectUnauthorized: true
+};
+
 const dbName = process.env.DB_NAME || 'therapy_summary_db';
 
 let pool = null;
@@ -22,10 +29,7 @@ async function initializeDatabase() {
     try {
       tempConnection = await mysql.createConnection({
         ...dbConfig,
-        ssl: {
-          minVersion: 'TLSv1.2',
-          rejectUnauthorized: true
-        }
+        ...(sslConfig && { ssl: sslConfig })
       });
     } catch (connErr) {
       if (connErr.code === 'ER_ACCESS_DENIED_ERROR' && dbConfig.password !== '') {
@@ -33,10 +37,7 @@ async function initializeDatabase() {
         dbConfig.password = '';
         tempConnection = await mysql.createConnection({
           ...dbConfig,
-          ssl: {
-            minVersion: 'TLSv1.2',
-            rejectUnauthorized: true
-          }
+          ...(sslConfig && { ssl: sslConfig })
         });
       } else {
         throw connErr;
@@ -52,10 +53,7 @@ async function initializeDatabase() {
       waitForConnections: true,
       connectionLimit: 10,
       queueLimit: 0,
-      ssl: {
-        minVersion: 'TLSv1.2',
-        rejectUnauthorized: true
-      }
+      ...(sslConfig && { ssl: sslConfig })
     });
 
     // 3. Test pool connection
