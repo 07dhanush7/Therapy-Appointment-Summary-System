@@ -45,7 +45,7 @@ async function initializeDatabase() {
     // 3. Test pool connection
     const testConnection = await pool.getConnection();
     testConnection.release();
-    console.log(`Successfully connected to database: ${dbName}`);
+    console.log('✓ Connected to MySQL Database');
 
     // 4. Check if we need to migrate/recreate tables (e.g. if the therapists table lacks new columns)
     let dropNeeded = false;
@@ -125,7 +125,7 @@ async function initializeDatabase() {
       ) ENGINE=InnoDB;
     `);
 
-    console.log('Database tables verified/created successfully.');
+    console.log('✓ Database tables verified/created successfully');
     return pool;
   } catch (error) {
     console.error('Failed to initialize database:', error.message);

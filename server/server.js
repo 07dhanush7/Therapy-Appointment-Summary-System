@@ -53,7 +53,7 @@ async function startServer() {
   try {
     await initializeDatabase();
     app.listen(PORT, () => {
-      console.log(`Server started successfully on port ${PORT}`);
+      console.log(`✓ Server started successfully on port ${PORT}`);
     });
   } catch (error) {
     console.error('Critical database initialization error. Server shutting down.');
