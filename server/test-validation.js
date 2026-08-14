@@ -86,6 +86,20 @@ async function testValidation() {
     assert(actRes.data.data.length > 0, 'Activity log list should not be empty');
     assert(actRes.data.data[0].activity_message !== undefined, 'Activity log should contain message field');
 
+    // 5. Activity log creation check
+    console.log('\nTest 5: Activity Log API Creation');
+    const createAct1 = await apiCall('/activities', 'POST', {
+      activity_type: 'Test Log',
+      activity_message: 'API activity log test succeeded.'
+    });
+    assert(createAct1.status === 201 && createAct1.data.success === true && createAct1.data.data.activity_message === 'API activity log test succeeded.', 'Should log activity successfully');
+
+    const createAct2 = await apiCall('/activities', 'POST', {
+      activity_type: '',
+      activity_message: 'Test message'
+    });
+    assert(createAct2.status === 400 && createAct2.data.success === false, 'Should reject empty activity_type');
+
     console.log('\n==================================================');
     console.log(`VALIDATION TESTS COMPLETED. Passed: ${passed}, Failed: ${failed}`);
     console.log('==================================================');
