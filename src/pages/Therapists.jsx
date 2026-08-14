@@ -427,7 +427,7 @@ const Therapists = () => {
         <form className="modern-form" onSubmit={handleSubmit}>
           <div className="form-grid">
             <div className="form-group full-width">
-              <label className="form-label">Therapist Name <span className="required">*</span></label>
+              <label className="form-label">Therapist Name</label>
               <input
                 type="text"
                 placeholder="e.g. Dr. Evelyn Vance"
@@ -439,7 +439,7 @@ const Therapists = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Specialty / Focus <span className="required">*</span></label>
+              <label className="form-label">Specialty / Focus</label>
               <input
                 type="text"
                 placeholder="e.g. Cognitive Behavioral Therapy (CBT)"
@@ -451,7 +451,7 @@ const Therapists = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Years of Experience <span className="required">*</span></label>
+              <label className="form-label">Years of Experience</label>
               <input
                 type="number"
                 min="0"
@@ -464,7 +464,7 @@ const Therapists = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Location (City) <span className="required">*</span></label>
+              <label className="form-label">Location (City)</label>
               <input
                 type="text"
                 placeholder="e.g. Bangalore"
@@ -476,7 +476,7 @@ const Therapists = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Availability Status <span className="required">*</span></label>
+              <label className="form-label">Availability Status</label>
               <select
                 value={availabilityStatus}
                 onChange={(e) => setAvailabilityStatus(e.target.value)}

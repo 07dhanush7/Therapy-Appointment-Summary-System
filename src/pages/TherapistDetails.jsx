@@ -649,7 +649,7 @@ const TherapistDetails = () => {
         <form className="modern-form" onSubmit={handleSubmit}>
           <div className="form-grid">
             <div className="form-group full-width">
-              <label className="form-label">Appointment Title <span className="required">*</span></label>
+              <label className="form-label">Appointment Title</label>
               <input
                 type="text"
                 placeholder="e.g. Cognitive Distortions Analysis"
@@ -661,7 +661,7 @@ const TherapistDetails = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Appointment Date <span className="required">*</span></label>
+              <label className="form-label">Appointment Date</label>
               <input
                 type="date"
                 value={date}
@@ -672,7 +672,7 @@ const TherapistDetails = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Appointment Time <span className="required">*</span></label>
+              <label className="form-label">Appointment Time</label>
               <input
                 type="time"
                 value={time}
@@ -683,7 +683,7 @@ const TherapistDetails = () => {
             </div>
 
             <div className="form-group full-width">
-              <label className="form-label">Status <span className="required">*</span></label>
+              <label className="form-label">Status</label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
@@ -698,7 +698,7 @@ const TherapistDetails = () => {
             </div>
 
             <div className="form-group full-width">
-              <label className="form-label">Appointment Summary <span className="required">*</span></label>
+              <label className="form-label">Appointment Summary</label>
               <textarea
                 placeholder="Provide a comprehensive summary of the topics discussed, clinical findings, and actions agreed upon..."
                 value={summary}
