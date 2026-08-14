@@ -194,7 +194,7 @@ const Therapists = () => {
             marginBottom: '12px'
           }}
         >
-          Therapists
+          TheraSync
         </motion.h1>
         <motion.p
           initial={{ y: 15, opacity: 0 }}
@@ -207,7 +207,7 @@ const Therapists = () => {
             lineHeight: '1.6'
           }}
         >
-          Manage therapist profiles and log clinical appointments.
+          Manage Therapists, Track Appointments, and Generate Clinical Summaries in One Place.
         </motion.p>
       </div>
 

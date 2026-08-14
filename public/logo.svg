@@ -1,15 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="48" height="48">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <!-- Definition for gradients if needed, but keeping it flat/solid as requested -->
+  <circle cx="50" cy="50" r="48" fill="#ffffff" stroke="#d8e5d9" stroke-width="2" />
+  
   <!-- Outer Sync Loop 1 (Forest Green) -->
   <path d="M 50,14 A 36,36 0 0,1 86,50 A 36,36 0 0,1 75,75" 
         fill="none" 
         stroke="#2c3e2e" 
-        stroke-width="7" 
+        stroke-width="5.5" 
         stroke-linecap="round" />
   <!-- Arrow Head 1 -->
   <path d="M 77,66 L 75,75 L 66,73" 
         fill="none" 
         stroke="#2c3e2e" 
-        stroke-width="5.5" 
+        stroke-width="4.5" 
         stroke-linecap="round" 
         stroke-linejoin="round" />
 
@@ -17,13 +20,13 @@
   <path d="M 50,86 A 36,36 0 0,1 14,50 A 36,36 0 0,1 25,25" 
         fill="none" 
         stroke="#4d6b50" 
-        stroke-width="7" 
+        stroke-width="5.5" 
         stroke-linecap="round" />
   <!-- Arrow Head 2 -->
   <path d="M 23,34 L 25,25 L 34,27" 
         fill="none" 
         stroke="#4d6b50" 
-        stroke-width="5.5" 
+        stroke-width="4.5" 
         stroke-linecap="round" 
         stroke-linejoin="round" />
 
@@ -34,6 +37,6 @@
   <!-- Subtle Medical Cross integrated inside the bubble (Accent Color #d8e5d9) -->
   <path d="M 50,40 V 56 M 42,48 H 58" 
         stroke="#d8e5d9" 
-        stroke-width="6.5" 
+        stroke-width="5.5" 
         stroke-linecap="round" />
 </svg>

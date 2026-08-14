@@ -1,6 +1,6 @@
-# Therapy Appointment Summary Application - Project Report
+# TheraSync - Project Report
 
-This report outlines the complete architecture, features, design specifications, and database schema built for the **Therapy Appointment Summary Application** up to the current state.
+This report outlines the complete architecture, features, design specifications, and database schema built for **TheraSync** up to the current state.
 
 ---
 

@@ -1,6 +1,6 @@
-# Therapy Appointment Summary Application - Backend API
+# TheraSync - Backend API
 
-This is the Express-based Node.js backend for the Therapy Appointment Summary application. It features automated MySQL initialization and connection pooling, standard REST APIs for Therapist and Appointment resources, a centralized global error handler, and a template for future Google Gemini AI integration.
+This is the Express-based Node.js backend for TheraSync. It features automated MySQL initialization and connection pooling, standard REST APIs for Therapist and Appointment resources, a centralized global error handler, and a template for future Google Gemini AI integration.
 
 ## Technologies Used
 - **Node.js** & **Express.js** for REST API structure.

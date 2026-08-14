@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { BrainCircuit } from 'lucide-react';
+import Logo from './Logo';
 
 const MESSAGES = [
-  "Gathering therapy appointment logs...",
+  "Gathering TheraSync appointment logs...",
   "Analyzing psychological themes...",
   "Synthesizing cognitive behavioral progress...",
   "Consolidating emotional regulation markers...",
@@ -41,8 +41,8 @@ const LoadingSpinner = () => {
             position: 'absolute',
             inset: 0,
             borderRadius: '50%',
-            border: '2px solid var(--accent-cyan)',
-            filter: 'drop-shadow(0 0 8px var(--accent-cyan))'
+            border: '2px solid var(--accent-sage)',
+            filter: 'drop-shadow(0 0 8px var(--accent-sage))'
           }}
         />
 
@@ -54,16 +54,16 @@ const LoadingSpinner = () => {
             position: 'absolute',
             inset: '-10px',
             borderRadius: '50%',
-            border: '2px dashed var(--accent-purple)',
-            filter: 'drop-shadow(0 0 10px var(--accent-purple))'
+            border: '2px dashed var(--accent-forest)',
+            filter: 'drop-shadow(0 0 10px var(--accent-forest))'
           }}
         />
 
-        {/* Central brain icon */}
+        {/* Central logo icon */}
         <div style={{
           position: 'absolute',
           inset: '10px',
-          background: 'rgba(13, 17, 39, 0.8)',
+          background: 'rgba(255, 255, 255, 0.9)',
           backdropFilter: 'blur(5px)',
           borderRadius: '50%',
           border: '1px solid var(--glass-border)',
@@ -77,7 +77,7 @@ const LoadingSpinner = () => {
             transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}
             style={{ display: 'flex', alignItems: 'center', justify: 'center' }}
           >
-            <BrainCircuit size={28} color="var(--accent-cyan)" />
+            <Logo size={32} />
           </motion.div>
         </div>
       </div>
@@ -87,7 +87,7 @@ const LoadingSpinner = () => {
           fontSize: '1.1rem',
           fontFamily: 'var(--font-heading)',
           fontWeight: 600,
-          background: 'linear-gradient(90deg, #fff, var(--accent-violet))',
+          background: 'linear-gradient(90deg, var(--accent-forest), var(--accent-sage))',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent'
         }}>

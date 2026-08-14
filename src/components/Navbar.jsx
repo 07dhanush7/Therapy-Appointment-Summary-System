@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
-import { BrainCircuit, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
+import Logo from './Logo';
 
 const Navbar = () => {
   return (
@@ -30,15 +31,16 @@ const Navbar = () => {
     >
       <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
         <div style={{
-          background: 'var(--accent-forest)',
-          padding: '8px',
+          background: 'var(--bg-secondary)',
+          padding: '4px',
           borderRadius: 'var(--radius-sm)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          boxShadow: '0 4px 10px rgba(44, 62, 46, 0.1)'
+          boxShadow: '0 4px 10px rgba(44, 62, 46, 0.05)',
+          border: '1px solid var(--glass-border)'
         }}>
-          <BrainCircuit size={20} color="#ffffff" strokeWidth={2} />
+          <Logo size={32} />
         </div>
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <span style={{
@@ -48,10 +50,10 @@ const Navbar = () => {
             letterSpacing: '-0.5px',
             color: 'var(--accent-forest)'
           }}>
-            AuraSummary
+            TheraSync
           </span>
           <span style={{ fontSize: '0.65rem', color: 'var(--accent-clay)', fontWeight: 600, letterSpacing: '1.2px', textTransform: 'uppercase' }}>
-            AI Therapist Companion
+            Therapy Appointment Summary Platform
           </span>
         </div>
       </Link>

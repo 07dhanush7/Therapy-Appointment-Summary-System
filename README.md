@@ -1,8 +1,15 @@
-# Therapy Appointment Summary Application
+# TheraSync
 
-A professional, clinical-grade management platform for therapists to track patient caseloads, log individual appointments, and generate secure AI consolidated clinical "Summary of Summaries". 
+A full-stack therapy appointment and clinical summary management platform built with React, Node.js, Express, and MySQL.
 
-Built with React (Vite) on the frontend and Node.js (Express) with MySQL on the backend.
+## Features
+- Therapist Management
+- Appointment Management
+- Clinical Session Summaries
+- Real-Time Insights
+- AI Summary Integration Ready
+- Responsive Design
+- RESTful API Architecture
 
 ---
 

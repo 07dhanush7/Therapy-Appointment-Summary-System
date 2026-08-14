@@ -1,7 +1,7 @@
 {
-  "name": "therapy-summary-backend",
+  "name": "therasync-backend",
   "version": "1.0.0",
-  "description": "Backend for Therapy Appointment Summary Application",
+  "description": "Backend for TheraSync",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
