@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Production-ready API service connecting to Express backend on localhost:5000
-const BASE_URL = 'http://localhost:5000/api';
+// Production-ready API service connecting to Express backend on Render (fallback to localhost:5000 in dev)
+const BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000/api' : 'https://therapy-appointment-summary-system.onrender.com/api');
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
