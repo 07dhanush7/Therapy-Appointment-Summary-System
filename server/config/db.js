@@ -38,23 +38,14 @@ async function initializeDatabase() {
       ...dbConfig,
       database: dbName,
       waitForConnections: true,
-      connectionLimit: 5,
-      queueLimit: 0,
-      connectTimeout: 10000,
-      acquireTimeout: 10000
+      connectionLimit: 10,
+      queueLimit: 0
     });
 
     // 3. Test pool connection
-    let testConnection;
-    try {
-      testConnection = await pool.getConnection();
-      testConnection.release();
-      console.log('✓ Connected to MySQL Database');
-    } catch (connErr) {
-      console.error('❌ Failed to connect to MySQL Database');
-      console.error(`Connection Error: ${connErr.code} - ${connErr.message}`);
-      throw connErr;
-    }
+    const testConnection = await pool.getConnection();
+    testConnection.release();
+    console.log(`Successfully connected to database: ${dbName}`);
 
     // 4. Check if we need to migrate/recreate tables (e.g. if the therapists table lacks new columns)
     let dropNeeded = false;
@@ -134,7 +125,7 @@ async function initializeDatabase() {
       ) ENGINE=InnoDB;
     `);
 
-    console.log('✓ Database tables verified/created successfully');
+    console.log('Database tables verified/created successfully.');
     return pool;
   } catch (error) {
     console.error('Failed to initialize database:', error.message);
@@ -163,21 +154,10 @@ module.exports = {
   getPool: () => pool,
   query: async (sql, params) => {
     if (!pool) {
-      const err = new Error('Database pool is not initialized. Call initializeDatabase() first.');
-      console.error('❌ Database query failed: Pool not initialized.');
-      throw err;
+      throw new Error('Database pool is not initialized. Call initializeDatabase() first.');
     }
-    const startTime = Date.now();
-    try {
-      console.log(`[DB Query Executed] SQL: ${sql} | Params: ${JSON.stringify(params || [])}`);
-      const [results] = await pool.query(sql, params);
-      const duration = Date.now() - startTime;
-      console.log(`[DB Query Success] Execution time: ${duration}ms`);
-      return results;
-    } catch (error) {
-      console.error(`❌ [DB Query Error] SQL: ${sql} | Error: ${error.message}`);
-      throw error;
-    }
+    const [results] = await pool.query(sql, params);
+    return results;
   },
   logActivity
 };
