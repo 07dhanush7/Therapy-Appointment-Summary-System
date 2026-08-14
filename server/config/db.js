@@ -2,12 +2,15 @@ const mysql = require('mysql2/promise');
 require('dotenv').config();
 
 const dbConfig = {
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD === 'YOUR_PASSWORD' ? '' : (process.env.DB_PASSWORD || '')
+  host: process.env.DB_HOST,
+  port: parseInt(process.env.DB_PORT || '3306', 10),
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 };
-
-const dbName = process.env.DB_NAME || 'therapy_summary_db';
 
 let pool = null;
 
@@ -16,36 +19,15 @@ let pool = null;
  */
 async function initializeDatabase() {
   try {
-    console.log(`Connecting to MySQL at ${dbConfig.host} as user ${dbConfig.user}...`);
-    // 1. Create a connection without DB name to check/create the DB
-    let tempConnection;
-    try {
-      tempConnection = await mysql.createConnection(dbConfig);
-    } catch (connErr) {
-      if (connErr.code === 'ER_ACCESS_DENIED_ERROR' && dbConfig.password !== '') {
-        console.warn('Access denied with configured password. Falling back to blank password...');
-        dbConfig.password = '';
-        tempConnection = await mysql.createConnection(dbConfig);
-      } else {
-        throw connErr;
-      }
-    }
-    await tempConnection.query(`CREATE DATABASE IF NOT EXISTS \`${dbName}\``);
-    await tempConnection.end();
+    console.log(`Connecting to FreeDB MySQL at ${dbConfig.host}:${dbConfig.port} as user ${dbConfig.user}...`);
 
-    // 2. Initialize the connection pool using the target database
-    pool = mysql.createPool({
-      ...dbConfig,
-      database: dbName,
-      waitForConnections: true,
-      connectionLimit: 10,
-      queueLimit: 0
-    });
+    // 1. Initialize the connection pool using the target database configuration
+    pool = mysql.createPool(dbConfig);
 
-    // 3. Test pool connection
+    // 2. Test pool connection
     const testConnection = await pool.getConnection();
     testConnection.release();
-    console.log(`Successfully connected to database: ${dbName}`);
+    console.log('✅ Connected to FreeDB MySQL Database');
 
     // 4. Check if we need to migrate/recreate tables (e.g. if the therapists table lacks new columns)
     let dropNeeded = false;
@@ -128,6 +110,7 @@ async function initializeDatabase() {
     console.log('Database tables verified/created successfully.');
     return pool;
   } catch (error) {
+    console.error('❌ Failed to connect to FreeDB MySQL Database');
     console.error('Failed to initialize database:', error.message);
     throw error;
   }

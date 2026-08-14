@@ -1,4 +1,13 @@
-const db = require('./config/db');
+const mysql = require('mysql2/promise');
+require('dotenv').config();
+
+const dbConfig = {
+  host: process.env.DB_HOST,
+  port: parseInt(process.env.DB_PORT || '3306', 10),
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME
+};
 
 const sampleData = [
   {
@@ -163,25 +172,46 @@ const sampleData = [
   }
 ];
 
-async function seed() {
-  try {
-    console.log('Starting Database Seeding...');
-    await db.initializeDatabase();
+async function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
-    // Check if therapists already exist
-    const existing = await db.query('SELECT COUNT(*) as count FROM therapists');
-    if (existing[0].count > 0) {
-      console.log(`Database already contains ${existing[0].count} therapists. Clearing old data to ensure exact sample data match...`);
-      await db.query('SET FOREIGN_KEY_CHECKS = 0');
-      await db.query('TRUNCATE TABLE appointments');
-      await db.query('TRUNCATE TABLE therapists');
-      await db.query('SET FOREIGN_KEY_CHECKS = 1');
-      console.log('Old tables cleared successfully.');
+async function getSingleConnection(retries = 5, delayMs = 2000) {
+  for (let i = 1; i <= retries; i++) {
+    try {
+      const conn = await mysql.createConnection(dbConfig);
+      return conn;
+    } catch (err) {
+      if (err.code === 'ER_TOO_MANY_USER_CONNECTIONS') {
+        console.warn(`[Retry ${i}/${retries}] Connection limit reached. Waiting ${delayMs}ms...`);
+        if (i === retries) {
+          throw new Error('FreeDB database has reached its max user connections limit. Please temporarily close MySQL Workbench or stop the running server to proceed.');
+        }
+        await delay(delayMs);
+      } else {
+        throw err;
+      }
     }
+  }
+}
+
+async function seed() {
+  let conn;
+  try {
+    console.log('Starting Resilient Database Seeding...');
+    conn = await getSingleConnection();
+    console.log('Connected to FreeDB database successfully.');
+
+    // Clear old data safely
+    await conn.query('SET FOREIGN_KEY_CHECKS = 0');
+    await conn.query('TRUNCATE TABLE appointments');
+    await conn.query('TRUNCATE TABLE therapists');
+    await conn.query('SET FOREIGN_KEY_CHECKS = 1');
+    console.log('Old tables cleared successfully.');
 
     // Insert sample data
     for (const item of sampleData) {
-      const result = await db.query(
+      const [result] = await conn.execute(
         'INSERT INTO therapists (therapist_name, specialization, description, profile_image, experience_years, location, availability_status) VALUES (?, ?, ?, ?, ?, ?, ?)',
         [item.name, item.specialization, item.description, item.profile_image, item.experience_years, item.location, item.availability_status]
       );
@@ -189,7 +219,7 @@ async function seed() {
       console.log(`Inserted Therapist: ${item.name} with ID: ${therapistId}`);
 
       for (const appt of item.appointments) {
-        await db.query(
+        await conn.execute(
           'INSERT INTO appointments (therapist_id, appointment_title, summary, appointment_date, appointment_time, status) VALUES (?, ?, ?, ?, ?, ?)',
           [therapistId, appt.title, appt.summary, appt.date, appt.time, appt.status]
         );
@@ -200,9 +230,13 @@ async function seed() {
     console.log('\n==================================================');
     console.log('DATABASE SEEDING COMPLETED SUCCESSFULY!');
     console.log('==================================================');
+    await conn.end();
     process.exit(0);
   } catch (error) {
     console.error('Error seeding database:', error.message);
+    if (conn) {
+      try { await conn.end(); } catch (e) {}
+    }
     process.exit(1);
   }
 }
