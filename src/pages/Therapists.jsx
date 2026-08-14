@@ -424,106 +424,99 @@ const Therapists = () => {
         onClose={() => setIsModalOpen(false)}
         title={editingTherapist ? "Edit Therapist Profile" : "Create Therapist Profile"}
       >
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'left' }}>
-            <label style={{ fontSize: '0.85rem', color: 'var(--accent-forest)', fontWeight: 600 }}>Therapist Name</label>
-            <input
-              type="text"
-              placeholder="e.g. Dr. Evelyn Vance"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="glass-input"
-              required
-            />
-          </div>
+        <form className="modern-form" onSubmit={handleSubmit}>
+          <div className="form-grid">
+            <div className="form-group full-width">
+              <label className="form-label">Therapist Name <span className="required">*</span></label>
+              <input
+                type="text"
+                placeholder="e.g. Dr. Evelyn Vance"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="form-input"
+                required
+              />
+            </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'left' }}>
-            <label style={{ fontSize: '0.85rem', color: 'var(--accent-forest)', fontWeight: 600 }}>Specialty / Focus</label>
-            <input
-              type="text"
-              placeholder="e.g. Cognitive Behavioral Therapy (CBT)"
-              value={specialty}
-              onChange={(e) => setSpecialty(e.target.value)}
-              className="glass-input"
-              required
-            />
-          </div>
+            <div className="form-group">
+              <label className="form-label">Specialty / Focus <span className="required">*</span></label>
+              <input
+                type="text"
+                placeholder="e.g. Cognitive Behavioral Therapy (CBT)"
+                value={specialty}
+                onChange={(e) => setSpecialty(e.target.value)}
+                className="form-input"
+                required
+              />
+            </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'left' }}>
-            <label style={{ fontSize: '0.85rem', color: 'var(--accent-forest)', fontWeight: 600 }}>Short Biography (Optional)</label>
-            <textarea
-              placeholder="Provide a brief clinical background..."
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              className="glass-input"
-              rows={4}
-              style={{ resize: 'none', fontFamily: 'var(--font-sans)', lineHeight: '1.4' }}
-            />
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'left' }}>
-            <label style={{ fontSize: '0.85rem', color: 'var(--accent-forest)', fontWeight: 600 }}>Profile Image URL (Optional)</label>
-            <input
-              type="url"
-              placeholder="e.g. https://images.unsplash.com/photo-..."
-              value={avatar}
-              onChange={(e) => setAvatar(e.target.value)}
-              className="glass-input"
-            />
-          </div>
-
-          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'left', flex: '1 1 120px' }}>
-              <label style={{ fontSize: '0.85rem', color: 'var(--accent-forest)', fontWeight: 600 }}>Years of Experience</label>
+            <div className="form-group">
+              <label className="form-label">Years of Experience <span className="required">*</span></label>
               <input
                 type="number"
                 min="0"
                 placeholder="e.g. 10"
                 value={experienceYears}
                 onChange={(e) => setExperienceYears(e.target.value)}
-                className="glass-input"
+                className="form-input"
                 required
               />
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'left', flex: '1 1 200px' }}>
-              <label style={{ fontSize: '0.85rem', color: 'var(--accent-forest)', fontWeight: 600 }}>Location (City)</label>
+
+            <div className="form-group">
+              <label className="form-label">Location (City) <span className="required">*</span></label>
               <input
                 type="text"
                 placeholder="e.g. Bangalore"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="glass-input"
+                className="form-input"
                 required
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Availability Status <span className="required">*</span></label>
+              <select
+                value={availabilityStatus}
+                onChange={(e) => setAvailabilityStatus(e.target.value)}
+                className="form-select"
+                required
+              >
+                <option value="Available Today">Available Today</option>
+                <option value="Available Tomorrow">Available Tomorrow</option>
+                <option value="Not Available">Not Available</option>
+              </select>
+            </div>
+
+            <div className="form-group full-width">
+              <label className="form-label">Profile Image URL</label>
+              <input
+                type="url"
+                placeholder="e.g. https://images.unsplash.com/photo-..."
+                value={avatar}
+                onChange={(e) => setAvatar(e.target.value)}
+                className="form-input"
+              />
+            </div>
+
+            <div className="form-group full-width">
+              <label className="form-label">Short Biography</label>
+              <textarea
+                placeholder="Provide a brief clinical background..."
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                className="form-textarea"
+                rows={4}
               />
             </div>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'left' }}>
-            <label style={{ fontSize: '0.85rem', color: 'var(--accent-forest)', fontWeight: 600 }}>Availability Status</label>
-            <select
-              value={availabilityStatus}
-              onChange={(e) => setAvailabilityStatus(e.target.value)}
-              className="glass-input"
-              required
-            >
-              <option value="Available Today">Available Today</option>
-              <option value="Available Tomorrow">Available Tomorrow</option>
-              <option value="Not Available">Not Available</option>
-            </select>
-          </div>
-
-          <div style={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            gap: '12px',
-            borderTop: '1px solid rgba(44, 62, 46, 0.08)',
-            paddingTop: '20px',
-            marginTop: '8px'
-          }}>
-            <button type="button" onClick={() => setIsModalOpen(false)} className="btn btn-secondary">
+          <div className="form-footer">
+            <button type="button" onClick={() => setIsModalOpen(false)} className="btn-secondary-modern">
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary" style={{ color: '#ffffff' }}>
+            <button type="submit" className="btn-primary-modern">
               {editingTherapist ? "Save Changes" : "Create Profile"}
             </button>
           </div>

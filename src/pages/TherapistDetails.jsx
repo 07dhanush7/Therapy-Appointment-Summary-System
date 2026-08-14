@@ -646,82 +646,75 @@ const TherapistDetails = () => {
         onClose={() => setIsModalOpen(false)}
         title={editingAppointment ? "Edit Session Details" : "Record Session Details"}
       >
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'left' }}>
-            <label style={{ fontSize: '0.85rem', color: 'var(--accent-forest)', fontWeight: 600 }}>Appointment Title</label>
-            <input
-              type="text"
-              placeholder="e.g. Cognitive Distortions Analysis"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="glass-input"
-              required
-            />
-          </div>
+        <form className="modern-form" onSubmit={handleSubmit}>
+          <div className="form-grid">
+            <div className="form-group full-width">
+              <label className="form-label">Appointment Title <span className="required">*</span></label>
+              <input
+                type="text"
+                placeholder="e.g. Cognitive Distortions Analysis"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="form-input"
+                required
+              />
+            </div>
 
-          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'left', flex: '1 1 200px' }}>
-              <label style={{ fontSize: '0.85rem', color: 'var(--accent-forest)', fontWeight: 600 }}>Appointment Date</label>
+            <div className="form-group">
+              <label className="form-label">Appointment Date <span className="required">*</span></label>
               <input
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="glass-input"
+                className="form-input"
                 required
               />
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'left', flex: '1 1 200px' }}>
-              <label style={{ fontSize: '0.85rem', color: 'var(--accent-forest)', fontWeight: 600 }}>Appointment Time</label>
+
+            <div className="form-group">
+              <label className="form-label">Appointment Time <span className="required">*</span></label>
               <input
                 type="time"
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
-                className="glass-input"
+                className="form-input"
+                required
+              />
+            </div>
+
+            <div className="form-group full-width">
+              <label className="form-label">Status <span className="required">*</span></label>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="form-select"
+                required
+              >
+                <option value="Scheduled">Scheduled</option>
+                <option value="Completed">Completed</option>
+                <option value="Pending">Pending</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </div>
+
+            <div className="form-group full-width">
+              <label className="form-label">Appointment Summary <span className="required">*</span></label>
+              <textarea
+                placeholder="Provide a comprehensive summary of the topics discussed, clinical findings, and actions agreed upon..."
+                value={summary}
+                onChange={(e) => setSummary(e.target.value)}
+                className="form-textarea"
+                rows={6}
                 required
               />
             </div>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'left' }}>
-            <label style={{ fontSize: '0.85rem', color: 'var(--accent-forest)', fontWeight: 600 }}>Appointment Summary</label>
-            <textarea
-              placeholder="Provide a comprehensive summary of the topics discussed, clinical findings, and actions agreed upon..."
-              value={summary}
-              onChange={(e) => setSummary(e.target.value)}
-              className="glass-input"
-              rows={6}
-              style={{ resize: 'none', fontFamily: 'var(--font-sans)', lineHeight: '1.5' }}
-              required
-            />
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'left' }}>
-            <label style={{ fontSize: '0.85rem', color: 'var(--accent-forest)', fontWeight: 600 }}>Status</label>
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              className="glass-input"
-              required
-            >
-              <option value="Scheduled">Scheduled</option>
-              <option value="Completed">Completed</option>
-              <option value="Pending">Pending</option>
-              <option value="Cancelled">Cancelled</option>
-            </select>
-          </div>
-
-          <div style={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            gap: '12px',
-            borderTop: '1px solid rgba(44, 62, 46, 0.08)',
-            paddingTop: '20px',
-            marginTop: '8px'
-          }}>
-            <button type="button" onClick={() => setIsModalOpen(false)} className="btn btn-secondary">
+          <div className="form-footer">
+            <button type="button" onClick={() => setIsModalOpen(false)} className="btn-secondary-modern">
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary" style={{ color: '#ffffff' }}>
+            <button type="submit" className="btn-primary-modern">
               {editingAppointment ? "Save Changes" : "Log Appointment"}
             </button>
           </div>
