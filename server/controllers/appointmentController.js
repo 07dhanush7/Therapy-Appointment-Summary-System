@@ -2,6 +2,24 @@ const db = require('../config/db');
 const { AppError } = require('../middleware/errorHandler');
 
 /**
+ * Get all appointments.
+ * GET /api/appointments
+ */
+exports.getAllAppointments = async (req, res, next) => {
+  try {
+    const appointments = await db.query(
+      'SELECT appointment_id, therapist_id, appointment_title, summary, DATE_FORMAT(appointment_date, "%Y-%m-%d") AS appointment_date, TIME_FORMAT(appointment_time, "%H:%i") AS appointment_time, status, created_at FROM appointments ORDER BY appointment_date DESC, appointment_time DESC'
+    );
+    res.status(200).json({
+      success: true,
+      data: appointments
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * Get all appointments belonging to a specific therapist.
  * GET /api/appointments/therapist/:therapistId
  */
