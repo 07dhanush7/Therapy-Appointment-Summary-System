@@ -1,300 +1,167 @@
-# TheraSync
+# 🌿 TheraSync – Therapy Appointment & Session Summary Platform
 
-A full-stack therapy appointment and clinical summary management platform built with React, Node.js, Express, and MySQL.
+[![Vercel Deployment](https://img.shields.io/badge/Frontend-Vercel-black?logo=vercel&logoColor=white&style=flat-square)](https://therapy-appointment-summary-system.vercel.app)
+[![Render Deployment](https://img.shields.io/badge/Backend-Render-46E3B7?logo=render&logoColor=white&style=flat-square)](https://therapy-appointment-summary-system.onrender.com)
+[![MySQL/TiDB Cloud](https://img.shields.io/badge/Database-TiDB%20Cloud-blue?logo=mysql&logoColor=white&style=flat-square)](https://en.pingcap.com/tidb-cloud/)
+[![Node.js Version](https://img.shields.io/badge/Node.js-v18%2B-green?logo=node.js&logoColor=white&style=flat-square)](https://nodejs.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 
-## Features
-- Therapist Management
-- Appointment Management
-- Clinical Session Summaries
-- Real-Time Insights
-- AI Summary Integration Ready
-- Responsive Design
-- RESTful API Architecture
+TheraSync is a premium, full-stack MERN & MySQL web application designed to help therapists and clinical managers organize client files, schedule session appointments, record clinical observations, and generate AI-assisted therapy summaries. 
+
+The application utilizes a sleek, dark-themed glassmorphic user interface tailored for professional clinical environments, eliminating distracting clutter while retaining a premium aesthetic.
 
 ---
 
-## Installation Steps
+## 🚀 Key Features
+
+*   **👥 Therapist Directory Management**:
+    *   Create, view, edit, and delete comprehensive therapist profiles.
+    *   Multi-column layouts with specialization, years of experience, email, and biography.
+    *   Support for the following specialization categories:
+        *   **CBT** (Cognitive Behavioral Therapy)
+        *   **Trauma Recovery**
+        *   **Family Therapy**
+        *   **Mindfulness**
+        *   **Child Therapy**
+*   **📷 Local File Upload Integration**:
+    *   File upload capabilities powered by **Multer** on the backend.
+    *   Validates image formats (`.png`, `.jpg`, `.jpeg`, `.webp`) and enforces a maximum size of `5MB`.
+    *   Interactive client-side image previewing before profile updates.
+*   **📅 Session Appointment Booking**:
+    *   Add appointments containing title, time, date, and status (`Scheduled`, `Completed`, `Cancelled`).
+    *   Automatic cascade-deletion of appointments when the parent therapist profile is deleted.
+*   **🧠 AI-Assisted Session Summaries**:
+    *   Generate clinical session summaries utilizing integrated Google Gemini AI templates.
+*   **🔒 Robust Storage & Seed Datasets**:
+    *   Configured remote connections to TiDB/MySQL Cloud with secure SSL certificates.
+    *   Self-healing auto-seeding system: automatically builds and seeds the database with 25 unique, realistic therapist records and 125 scheduled session appointments if startup checks return empty.
+
+---
+
+## 🛠️ Tech Stack
+
+*   **Frontend**: React (Vite-powered SPA), CSS3 (Custom Glassmorphism and Backdrop Blurs), Axios (Multipart/FormData configurations)
+*   **Backend**: Node.js, Express.js REST API
+*   **Database**: MySQL / TiDB Cloud
+*   **File Uploads**: Multer
+*   **Deployment**: Vercel (Client Routing redirects configured via `vercel.json`), Render (Node Server hosting)
+
+---
+
+## 📂 Project Structure
+
+```text
+TheraSync/
+├── public/                 # Static public assets
+├── src/
+│   ├── components/         # Reusable React components (Modals, Cards, Nav)
+│   ├── pages/              # SPA Dashboard pages (Therapists, Insights, Appointments)
+│   ├── services/           # Axios network configurations & API mappings
+│   ├── index.css           # Global design tokens and UI theme styling
+│   └── main.jsx
+├── server/
+│   ├── config/             # Database connection and initialization settings
+│   ├── controllers/        # Express handlers (Therapist, Appointment, Activity controllers)
+│   ├── middleware/         # Upload verification (Multer) & error handling middleware
+│   ├── routes/             # REST endpoints route declarations
+│   ├── services/           # Gemini AI wrapper service
+│   ├── uploads/            # Server static storage for therapist images
+│   ├── seed-db.js          # Standalone seed utility
+│   └── server.js           # Server runner configuration
+├── therapists.sql          # Pre-packaged therapists seed script
+├── appointments.sql        # Pre-packaged appointments seed script
+├── vercel.json             # SPA Routing directives for Vercel deployment
+└── package.json
+```
+
+---
+
+## 🔧 Installation & Local Setup
 
 ### Prerequisites
-* [Node.js](https://nodejs.org/) (v16 or higher)
-* [MySQL Server](https://dev.mysql.com/downloads/installer/)
+*   **Node.js** (v18.0.0 or higher)
+*   **MySQL Server** or **TiDB Cloud** cluster
 
 ### 1. Database Setup
-Ensure MySQL is running. Connect to MySQL and create the database (or the backend will attempt to initialize it automatically on startup):
+Create a new MySQL database:
 ```sql
-CREATE DATABASE IF NOT EXISTS therapy_summary_db;
+CREATE DATABASE therasync_db;
 ```
 
-### 2. Backend Setup
-1. Open a terminal and navigate to the `server/` directory:
-   ```bash
-   cd server
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Configure environment variables in `server/.env` (see below).
-4. Start the server:
-   ```bash
-   npm run dev
-   ```
-
-### 3. Frontend Setup
-1. Open a new terminal and navigate to the root directory:
-   ```bash
-   cd ..
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Start the client development server:
-   ```bash
-   npm run dev
-   ```
-4. Access the application in your browser at `http://localhost:5173`.
-
----
-
-## Environment Variables
-
-Create a `.env` file in the `server/` directory and configure the following variables:
-
-```ini
+### 2. Backend Installation & Environment Config
+Navigate to the `server/` directory:
+```bash
+cd server
+npm install
+```
+Create a `.env` file inside the `server/` folder and populate the following keys:
+```env
 PORT=5000
 DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=YOUR_DATABASE_PASSWORD
-DB_NAME=therapy_summary_db
-OPENROUTER_API_KEY=YOUR_OPENROUTER_API_KEY
+DB_PORT=3306
+DB_USER=your_mysql_username
+DB_PASSWORD=your_mysql_password
+DB_NAME=therasync_db
+GEMINI_API_KEY=your_google_gemini_api_key
+```
+
+### 3. Database Seeding
+To quickly populate the database with 25 therapists and 125 appointments:
+```bash
+npm run seed
+```
+
+### 4. Frontend Installation
+Return to the project root directory:
+```bash
+npm install
+```
+Create a `.env` file in the root directory:
+```env
+VITE_API_URL=http://localhost:5000/api
+```
+
+### 5. Running the Application
+Start the backend development server (inside `server/`):
+```bash
+npm run dev
+```
+Start the frontend development server (inside root directory):
+```bash
+npm run dev
 ```
 
 ---
 
-## API Endpoints
+## 🔗 REST API Endpoints
 
-### 1. Therapists
+### 👥 Therapists
+*   `GET /api/therapists` — Fetch all therapist profiles.
+*   `GET /api/therapists/:id` — Fetch single therapist profile details.
+*   `POST /api/therapists` — Create a profile (`multipart/form-data` with `profileImage` file).
+*   `PUT /api/therapists/:id` — Update a profile (`multipart/form-data` with `profileImage` file).
+*   `DELETE /api/therapists/:id` — Delete a therapist and cascade-delete their appointments.
 
-#### **GET /api/therapists**
-Retrieve a list of all therapist profiles.
-* **Response (200 OK)**:
-  ```json
-  {
-    "success": true,
-    "data": [
-      {
-        "therapist_id": 1,
-        "therapist_name": "Dr. Sarah Smith",
-        "specialization": "Trauma Recovery",
-        "description": "Specializes in EMDR and PTSD clinical recovery.",
-        "profile_image": "https://images.unsplash.com/photo-...",
-        "created_at": "2026-08-12T05:00:00.000Z"
-      }
-    ]
-  }
-  ```
+### 📅 Appointments
+*   `GET /api/appointments` — Fetch all appointments.
+*   `POST /api/appointments` — Schedule a new session appointment.
 
-#### **POST /api/therapists**
-Create a new therapist profile.
-* **Request Body**:
-  ```json
-  {
-    "therapist_name": "Dr. Sarah Smith",
-    "specialization": "Trauma Recovery",
-    "description": "Specializes in EMDR and PTSD clinical recovery.",
-    "profile_image": "/images/sarah_williams.png",
-    "experience_years": 12,
-    "location": "Bangalore",
-    "availability_status": "Available Today"
-  }
-  ```
-* **Response (201 Created)**:
-  ```json
-  {
-    "success": true,
-    "message": "Therapist created successfully",
-    "data": {
-      "therapist_id": 1,
-      "therapist_name": "Dr. Sarah Smith",
-      "specialization": "Trauma Recovery",
-      "description": "Specializes in EMDR and PTSD clinical recovery.",
-      "profile_image": "/images/sarah_williams.png",
-      "experience_years": 12,
-      "location": "Bangalore",
-      "availability_status": "Available Today"
-    }
-  }
-  ```
+### 📝 Insights & AI
+*   `GET /api/insights` — Retrieve platform activity statistics and category analytics.
+*   `POST /api/generate-summary` — Process session outlines and generate AI summaries.
 
-#### **PUT /api/therapists/:id**
-Update an existing therapist profile.
-* **Request Body**:
-  ```json
-  {
-    "therapist_name": "Dr. Sarah J. Smith",
-    "specialization": "Trauma Recovery & EMDR"
-  }
-  ```
-* **Response (200 OK)**:
-  ```json
-  {
-    "success": true,
-    "message": "Therapist updated successfully",
-    "data": {
-      "therapist_id": 1,
-      "therapist_name": "Dr. Sarah J. Smith",
-      "specialization": "Trauma Recovery & EMDR",
-      "description": "Specializes in EMDR and PTSD clinical recovery.",
-      "profile_image": "https://images.unsplash.com/photo-..."
-    }
-  }
-  ```
-
-#### **DELETE /api/therapists/:id**
-Remove a therapist profile (cascade deletes all associated appointments).
-* **Response (200 OK)**:
-  ```json
-  {
-    "success": true,
-    "message": "Therapist deleted successfully"
-  }
-  ```
+### 🔧 Diagnostics
+*   `GET /api/debug/database` — Check table statistics, row counts, and active connections.
 
 ---
 
-### 2. Appointments
+## 🛡️ License
 
-#### **GET /api/appointments/therapist/:id**
-Retrieve all appointments logged under a specific therapist ID, sorted by latest date and time.
-* **Response (200 OK)**:
-  ```json
-  {
-    "success": true,
-    "data": [
-      {
-        "appointment_id": 5,
-        "therapist_id": 1,
-        "appointment_title": "Cognitive Reframing Session",
-        "summary": "Patient explored negative automatic thoughts and began cognitive reconstruction exercises.",
-        "appointment_date": "2026-08-15",
-        "appointment_time": "10:30",
-        "created_at": "2026-08-12T06:00:00.000Z"
-      }
-    ]
-  }
-  ```
-
-#### **POST /api/appointments**
-Log a new appointment.
-* **Request Body**:
-  ```json
-  {
-    "therapist_id": 1,
-    "appointment_title": "Cognitive Reframing Session",
-    "summary": "Patient explored negative automatic thoughts and began cognitive reconstruction exercises.",
-    "appointment_date": "2026-08-15",
-    "appointment_time": "10:30",
-    "status": "Scheduled"
-  }
-  ```
-* **Response (201 Created)**:
-  ```json
-  {
-    "success": true,
-    "message": "Appointment created successfully",
-    "data": {
-      "appointment_id": 5,
-      "therapist_id": 1,
-      "appointment_title": "Cognitive Reframing Session",
-      "summary": "Patient explored negative automatic thoughts and began cognitive reconstruction exercises.",
-      "appointment_date": "2026-08-15",
-      "appointment_time": "10:30",
-      "status": "Scheduled"
-    }
-  }
-  ```
-
-#### **PUT /api/appointments/:id**
-Update an existing appointment.
-* **Request Body**:
-  ```json
-  {
-    "appointment_title": "Advanced Cognitive Reframing",
-    "summary": "Deep-dive session investigating core beliefs. Significant progress achieved."
-  }
-  ```
-* **Response (200 OK)**:
-  ```json
-  {
-    "success": true,
-    "message": "Appointment updated successfully",
-    "data": {
-      "appointment_id": 5,
-      "therapist_id": 1,
-      "appointment_title": "Advanced Cognitive Reframing",
-      "summary": "Deep-dive session investigating core beliefs. Significant progress achieved.",
-      "appointment_date": "2026-08-15",
-      "appointment_time": "10:30"
-    }
-  }
-  ```
-
-#### **DELETE /api/appointments/:id**
-Delete an appointment log.
-* **Response (200 OK)**:
-  ```json
-  {
-    "success": true,
-    "message": "Appointment deleted successfully"
-  }
-  ```
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
 ---
 
-### 3. Recent Activities
+## 🧑‍💻 Author
 
-#### **GET /api/activities**
-Get the latest 10 logs of modifications across therapists and appointments.
-* **Response (200 OK)**:
-  ```json
-  {
-    "success": true,
-    "data": [
-      {
-        "activity_id": 12,
-        "activity_type": "Appointment Added",
-        "activity_message": "Appointment Added",
-        "formatted_time": "10:30 AM",
-        "created_at": "2026-08-12T06:00:00.000Z"
-      }
-    ]
-  }
-  ```
-
----
-
-### 4. AI Consolidation
-
-#### **POST /api/generate-summary/:therapistId**
-Consolidate all logs for a therapist using AI into a single clinical synthesis.
-* **Response (200 OK)**:
-  ```json
-  {
-    "success": true,
-    "therapistId": 1,
-    "summary": "Over the logged sessions, the patient demonstrated progress in recognizing automatic negative thoughts. Focus was placed on emotional regulation..."
-  }
-  ```
-
----
-
-## Backend Validation Errors
-
-Validation failures return status code `400 Bad Request` with:
-```json
-{
-  "success": false,
-  "message": "Validation error"
-}
-```
+Developed with care by **Dhanush Ragava R V**.
+For issues, feature requests, or contributions, feel free to open a Pull Request.
