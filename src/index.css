@@ -256,9 +256,9 @@ h1, h2, h3, h4, h5, h6 {
 .modal-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(35, 65, 47, 0.35); /* Forest green tint for overlay */
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(26, 38, 30, 0.8); /* Higher opacity forest-charcoal overlay to block background content */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 /* Rounded corners 24px, max width 700px, width 95% */
@@ -271,10 +271,8 @@ h1, h2, h3, h4, h5, h6 {
   flex-direction: column;
   z-index: 10001;
   border-radius: var(--radius-xl);
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  background: rgba(255, 255, 255, 0.88); /* Clean glassmorphism cards bg */
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid rgba(35, 65, 47, 0.12);
+  background: #FFFFFF; /* Fully opaque background to prevent dashboard text from bleeding through */
   box-shadow: 0 24px 60px rgba(35, 65, 47, 0.12), 0 1px 3px rgba(35, 65, 47, 0.04);
   overflow: hidden;
 }
