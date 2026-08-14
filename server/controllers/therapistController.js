@@ -65,6 +65,9 @@ exports.getTherapistById = async (req, res, next) => {
 exports.createTherapist = async (req, res, next) => {
   try {
     console.log('Request received to create therapist. Body:', req.body);
+    if (req.file) {
+      console.log('Uploaded image file details:', req.file);
+    }
 
     const { name, therapist_name, specialization, email, description, profile_image, experience_years } = req.body;
 
@@ -86,8 +89,15 @@ exports.createTherapist = async (req, res, next) => {
     }
 
     const trimmedDesc = description ? description.trim() : '';
-    const trimmedImg = profile_image ? profile_image.trim() : '';
     const expVal = experience_years !== undefined ? parseInt(experience_years) : 5;
+
+    // Image Upload Handling
+    let profileImageUrl = 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=300';
+    if (req.file) {
+      profileImageUrl = '/uploads/' + req.file.filename;
+    } else if (profile_image) {
+      profileImageUrl = profile_image;
+    }
 
     // Check for duplicate therapist name (case-insensitive)
     const duplicate = await db.query(
@@ -102,7 +112,7 @@ exports.createTherapist = async (req, res, next) => {
     console.log('Database insert started...');
     const result = await db.query(
       'INSERT INTO therapists (therapist_name, specialization, email, description, profile_image, experience_years) VALUES (?, ?, ?, ?, ?, ?)',
-      [finalName, finalSpec, finalEmail, trimmedDesc, trimmedImg, expVal]
+      [finalName, finalSpec, finalEmail, trimmedDesc, profileImageUrl, expVal]
     );
 
     console.log('Database insert successful. Result:', result);
@@ -122,7 +132,7 @@ exports.createTherapist = async (req, res, next) => {
         specialization: finalSpec,
         email: finalEmail,
         description: trimmedDesc,
-        profile_image: trimmedImg,
+        profile_image: profileImageUrl,
         experience_years: expVal
       }
     });
@@ -152,8 +162,15 @@ exports.updateTherapist = async (req, res, next) => {
     const specVal = specialization !== undefined ? specialization : existing.specialization;
     const emailVal = email !== undefined ? email : existing.email;
     const descVal = description !== undefined ? description : existing.description;
-    const imgVal = profile_image !== undefined ? profile_image : existing.profile_image;
     const expVal = experience_years !== undefined ? parseInt(experience_years) : existing.experience_years;
+
+    // Image Upload Handling
+    let profileImageUrl = existing.profile_image;
+    if (req.file) {
+      profileImageUrl = '/uploads/' + req.file.filename;
+    } else if (profile_image !== undefined) {
+      profileImageUrl = profile_image;
+    }
 
     // Validation: Required and not whitespace-only
     if (!nameVal || typeof nameVal !== 'string' || nameVal.trim() === '') {
@@ -167,7 +184,6 @@ exports.updateTherapist = async (req, res, next) => {
     const trimmedSpec = specVal.trim();
     const trimmedEmail = emailVal ? emailVal.trim() : '';
     const trimmedDesc = descVal ? descVal.trim() : '';
-    const trimmedImg = imgVal ? imgVal.trim() : '';
 
     // Check for duplicate therapist name for a different ID (case-insensitive)
     const duplicate = await db.query(
@@ -180,7 +196,7 @@ exports.updateTherapist = async (req, res, next) => {
 
     await db.query(
       'UPDATE therapists SET therapist_name = ?, specialization = ?, email = ?, description = ?, profile_image = ?, experience_years = ? WHERE therapist_id = ?',
-      [trimmedName, trimmedSpec, trimmedEmail, trimmedDesc, trimmedImg, expVal, id]
+      [trimmedName, trimmedSpec, trimmedEmail, trimmedDesc, profileImageUrl, expVal, id]
     );
 
     // Log Activity
@@ -197,7 +213,7 @@ exports.updateTherapist = async (req, res, next) => {
         specialization: trimmedSpec,
         email: trimmedEmail,
         description: trimmedDesc,
-        profile_image: trimmedImg,
+        profile_image: profileImageUrl,
         experience_years: expVal
       }
     });

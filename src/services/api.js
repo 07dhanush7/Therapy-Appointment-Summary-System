@@ -28,6 +28,18 @@ axiosInstance.interceptors.request.use(config => {
   return Promise.reject(error);
 });
 
+const formatAvatarUrl = (avatarPath) => {
+  if (!avatarPath) return 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=300';
+  if (avatarPath.startsWith('http://') || avatarPath.startsWith('https://')) {
+    return avatarPath;
+  }
+  if (avatarPath.startsWith('/uploads/')) {
+    const hostRoot = BASE_URL.endsWith('/api') ? BASE_URL.slice(0, -4) : (BASE_URL.endsWith('/api/') ? BASE_URL.slice(0, -5) : BASE_URL);
+    return `${hostRoot}${avatarPath}`;
+  }
+  return avatarPath;
+};
+
 export const api = {
   // --- THERAPISTS ---
   getTherapists: async () => {
@@ -37,10 +49,8 @@ export const api = {
       name: t.therapist_name,
       specialty: t.specialization,
       bio: t.description,
-      avatar: t.profile_image,
-      experienceYears: t.experience_years,
-      location: t.location,
-      availabilityStatus: t.availability_status
+      avatar: formatAvatarUrl(t.profile_image),
+      experienceYears: t.experience_years
     }));
   },
 
@@ -52,22 +62,26 @@ export const api = {
       name: t.therapist_name,
       specialty: t.specialization,
       bio: t.description,
-      avatar: t.profile_image,
-      experienceYears: t.experience_years,
-      location: t.location,
-      availabilityStatus: t.availability_status
+      avatar: formatAvatarUrl(t.profile_image),
+      experienceYears: t.experience_years
     };
   },
 
   addTherapist: async (therapistData) => {
-    const res = await axiosInstance.post('/therapists', {
-      therapist_name: therapistData.name,
-      specialization: therapistData.specialty,
-      description: therapistData.bio,
-      profile_image: therapistData.avatar,
-      experience_years: therapistData.experienceYears,
-      location: therapistData.location,
-      availability_status: therapistData.availabilityStatus
+    const formData = new FormData();
+    formData.append('therapist_name', therapistData.name);
+    formData.append('specialization', therapistData.specialty);
+    formData.append('description', therapistData.bio || '');
+    formData.append('experience_years', therapistData.experienceYears);
+    
+    if (therapistData.avatar) {
+      formData.append('profile_image', therapistData.avatar);
+    }
+
+    const res = await axiosInstance.post('/therapists', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
     });
     const t = res.data.data;
     return {
@@ -75,22 +89,26 @@ export const api = {
       name: t.therapist_name,
       specialty: t.specialization,
       bio: t.description,
-      avatar: t.profile_image,
-      experienceYears: t.experience_years,
-      location: t.location,
-      availabilityStatus: t.availability_status
+      avatar: formatAvatarUrl(t.profile_image),
+      experienceYears: t.experience_years
     };
   },
 
   updateTherapist: async (id, updatedData) => {
-    const res = await axiosInstance.put(`/therapists/${id}`, {
-      therapist_name: updatedData.name,
-      specialization: updatedData.specialty,
-      description: updatedData.bio,
-      profile_image: updatedData.avatar,
-      experience_years: updatedData.experienceYears,
-      location: updatedData.location,
-      availability_status: updatedData.availabilityStatus
+    const formData = new FormData();
+    formData.append('therapist_name', updatedData.name);
+    formData.append('specialization', updatedData.specialty);
+    formData.append('description', updatedData.bio || '');
+    formData.append('experience_years', updatedData.experienceYears);
+    
+    if (updatedData.avatar) {
+      formData.append('profile_image', updatedData.avatar);
+    }
+
+    const res = await axiosInstance.put(`/therapists/${id}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
     });
     const t = res.data.data;
     return {
@@ -98,10 +116,8 @@ export const api = {
       name: t.therapist_name,
       specialty: t.specialization,
       bio: t.description,
-      avatar: t.profile_image,
-      experienceYears: t.experience_years,
-      location: t.location,
-      availabilityStatus: t.availability_status
+      avatar: formatAvatarUrl(t.profile_image),
+      experienceYears: t.experience_years
     };
   },
 

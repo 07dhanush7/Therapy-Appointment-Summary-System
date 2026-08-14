@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 require('dotenv').config();
 
 const { initializeDatabase, query, dbConfig, dbName } = require('./config/db');
@@ -24,6 +25,9 @@ app.use((req, res, next) => {
 
 // Enable JSON Parsing for request bodies
 app.use(express.json());
+
+// Serve static uploaded files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Mount API Routes
 app.use('/api/therapists', therapistRoutes);

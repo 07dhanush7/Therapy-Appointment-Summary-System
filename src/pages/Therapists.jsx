@@ -30,7 +30,37 @@ const Therapists = () => {
   const [specialty, setSpecialty] = useState('');
   const [bio, setBio] = useState('');
   const [avatar, setAvatar] = useState('');
+  const [imagePreview, setImagePreview] = useState('');
   const [experienceYears, setExperienceYears] = useState(5);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate size (5MB = 5 * 1024 * 1024 bytes)
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('File size exceeds the 5MB limit.', 'error');
+      e.target.value = ''; // Reset input
+      return;
+    }
+
+    // Validate type
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      showToast('Invalid file format. Please upload PNG, JPG, JPEG, or WEBP.', 'error');
+      e.target.value = ''; // Reset input
+      return;
+    }
+
+    setAvatar(file);
+
+    // Create a local object URL to display preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
 
   useEffect(() => {
     fetchTherapists();
@@ -57,6 +87,7 @@ const Therapists = () => {
     setSpecialty('');
     setBio('');
     setAvatar('');
+    setImagePreview('');
     setExperienceYears(5);
     setIsModalOpen(true);
   };
@@ -67,6 +98,7 @@ const Therapists = () => {
     setSpecialty(therapist.specialty);
     setBio(therapist.bio);
     setAvatar(therapist.avatar || '');
+    setImagePreview(therapist.avatar || '');
     setExperienceYears(therapist.experienceYears || 5);
     setIsModalOpen(true);
   };
@@ -79,12 +111,11 @@ const Therapists = () => {
     }
 
     try {
-      const avatarUrl = avatar.trim() || 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=300';
       const payload = {
         name,
         specialty,
         bio,
-        avatar: avatarUrl,
+        avatar, // Can be File object or existing string URL
         experienceYears: parseInt(experienceYears)
       };
       if (editingTherapist) {
@@ -456,14 +487,36 @@ const Therapists = () => {
             </div>
 
             <div className="form-group full-width">
-              <label className="form-label">Profile Image URL</label>
-              <input
-                type="url"
-                placeholder="e.g. https://images.unsplash.com/photo-..."
-                value={avatar}
-                onChange={(e) => setAvatar(e.target.value)}
-                className="form-input"
-              />
+              <label className="form-label">Profile Image {!editingTherapist && <span className="required">*</span>}</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap', marginTop: '4px' }}>
+                {imagePreview && (
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    style={{
+                      width: '56px',
+                      height: '56px',
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                      border: '2px solid var(--accent-sage)',
+                      boxShadow: '0 2px 8px rgba(35, 65, 47, 0.1)'
+                    }}
+                  />
+                )}
+                <div style={{ flex: 1, minWidth: '200px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <input
+                    type="file"
+                    accept=".png,.jpg,.jpeg,.webp"
+                    onChange={handleFileChange}
+                    className="form-input"
+                    style={{ padding: '8px 12px', cursor: 'pointer' }}
+                    required={!editingTherapist}
+                  />
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    Supported formats: PNG, JPG, JPEG, WEBP. Max size: 5MB.
+                  </span>
+                </div>
+              </div>
             </div>
 
             <div className="form-group full-width">
