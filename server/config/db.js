@@ -4,7 +4,8 @@ require('dotenv').config();
 const dbConfig = {
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD === 'YOUR_PASSWORD' ? '' : (process.env.DB_PASSWORD || '')
+  password: process.env.DB_PASSWORD === 'YOUR_PASSWORD' ? '' : (process.env.DB_PASSWORD || ''),
+  port: parseInt(process.env.DB_PORT) || 3306
 };
 
 // Enable SSL/TLS only for remote database hosts (e.g. TiDB Cloud) to prevent local MySQL connection failures
@@ -154,6 +155,53 @@ async function initializeDatabase() {
       ) ENGINE=InnoDB;
     `);
 
+    // Auto-seed if database is empty
+    const [countResult] = await pool.query('SELECT COUNT(*) as count FROM therapists');
+    if (countResult[0].count === 0) {
+      console.log('Therapists table is empty. Auto-seeding initial sample data...');
+      
+      // Insert sample therapists
+      const [t1] = await pool.query(
+        'INSERT INTO therapists (therapist_name, specialization, email, description, profile_image, experience_years, location, availability_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        ['Dr. Sarah Williams', 'Clinical Psychology', 'sarah@example.com', 'Specialist in evidence-based clinical interventions, anxiety disorders, and personality assessments.', '/images/sarah_williams.png', 12, 'Bangalore', 'Available Today']
+      );
+      const [t2] = await pool.query(
+        'INSERT INTO therapists (therapist_name, specialization, email, description, profile_image, experience_years, location, availability_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        ['Dr. Michael Brown', 'Family Therapy', 'michael@example.com', 'Focuses on systemic family therapy, communication dynamics, and resolving conflict in relational systems.', '/images/michael_brown.png', 10, 'Chennai', 'Available Tomorrow']
+      );
+      const [t3] = await pool.query(
+        'INSERT INTO therapists (therapist_name, specialization, email, description, profile_image, experience_years, location, availability_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        ['Dr. Evelyn Vance', 'Cognitive Behavioral Therapy (CBT)', 'evelyn@example.com', 'Focused on identifying and reframing cognitive distortions, exposure response prevention, and goal-oriented CBT plans.', '/images/evelyn_vance.png', 8, 'Hyderabad', 'Available Today']
+      );
+
+      const id1 = t1.insertId;
+      const id2 = t2.insertId;
+      const id3 = t3.insertId;
+
+      // Insert sample appointments
+      await pool.query(
+        `INSERT INTO appointments (therapist_id, appointment_title, summary, appointment_date, appointment_time, status) VALUES 
+        (?, 'Initial Clinical Assessment', 'Assessed client history of general anxiety and panic triggers.', '2026-08-10', '09:00:00', 'Completed'),
+        (?, 'Anxiety Profiling Session', 'Completed diagnostic questionnaire and identified emotional distress triggers.', '2026-08-11', '10:00:00', 'Completed'),
+        (?, 'Family Intake Consultation', 'Met with parents and child to review home dynamics and communication breakdowns.', '2026-08-08', '09:30:00', 'Completed'),
+        (?, 'Conflict Resolution Session', 'Facilitated open dialogue between spouses regarding parental stress and chores.', '2026-08-09', '11:00:00', 'Completed'),
+        (?, 'CBT Intake Assessment', 'Discussed core negative self-beliefs and introduced basic CBT model concepts.', '2026-08-09', '10:00:00', 'Completed')`,
+        [id1, id1, id2, id2, id3]
+      );
+
+      // Insert sample activity logs
+      await pool.query(
+        `INSERT INTO activity_logs (activity_type, activity_message) VALUES 
+        ('System Initialization', 'Database tables verified/created successfully.'),
+        ('Therapist Added', 'Dr. Sarah Williams added to the platform.'),
+        ('Therapist Added', 'Dr. Michael Brown added to the platform.'),
+        ('Appointment Added', 'Appointment Initial Clinical Assessment created.'),
+        ('Appointment Added', 'Appointment Family Intake Consultation created.')`
+      );
+      
+      console.log('Database auto-seeding completed successfully.');
+    }
+
     console.log('Database tables verified/created successfully.');
     return pool;
   } catch (error) {
@@ -181,6 +229,8 @@ async function logActivity(type, message) {
 module.exports = {
   initializeDatabase,
   getPool: () => pool,
+  dbConfig,
+  dbName,
   query: async (sql, params) => {
     if (!pool) {
       throw new Error('Database pool is not initialized. Call initializeDatabase() first.');

@@ -7,7 +7,11 @@ const { AppError } = require('../middleware/errorHandler');
  */
 exports.getAllTherapists = async (req, res, next) => {
   try {
-    const therapists = await db.query('SELECT * FROM therapists ORDER BY therapist_id ASC');
+    const sql = 'SELECT * FROM therapists ORDER BY therapist_id ASC';
+    console.log('[Database Query Executing]', sql);
+    const therapists = await db.query(sql);
+    console.log('[Database Query Returned Rows]', therapists);
+    console.log('[Database Query Row Count]', therapists.length);
     
     // Map response to include aliases for both frontend (therapist_id) and standard formats (id)
     const mapped = therapists.map(t => ({

@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
-const { initializeDatabase, query } = require('./config/db');
+const { initializeDatabase, query, dbConfig, dbName } = require('./config/db');
 const therapistRoutes = require('./routes/therapistRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
 const insightsRoutes = require('./routes/insightsRoutes');
@@ -41,6 +41,37 @@ app.post('/api/generate-summary/:therapistId', async (req, res, next) => {
     const { therapistId } = req.params;
     const result = await aiService.generateSummary(therapistId);
     res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Database debugging endpoint for production verification
+app.get('/api/debug/database', async (req, res, next) => {
+  try {
+    const dbNameResult = await query('SELECT DATABASE() as dbName');
+    const resolvedDbName = dbNameResult[0]?.dbName || 'unknown';
+
+    const tablesResult = await query('SHOW TABLES');
+    const tables = tablesResult.map(row => Object.values(row)[0]);
+
+    let therapistCount = 0;
+    try {
+      const countRes = await query('SELECT COUNT(*) as count FROM therapists');
+      therapistCount = countRes[0]?.count || 0;
+    } catch (err) {
+      therapistCount = 'Error reading therapists table: ' + err.message;
+    }
+
+    res.status(200).json({
+      success: true,
+      database: dbName,
+      resolvedDatabase: resolvedDbName,
+      host: dbConfig.host,
+      user: dbConfig.user,
+      tables,
+      therapistCount
+    });
   } catch (error) {
     next(error);
   }
