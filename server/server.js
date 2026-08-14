@@ -40,6 +40,15 @@ app.post('/api/generate-summary/:therapistId', async (req, res, next) => {
   }
 });
 
+// Health check route for Render deployment
+app.get('/', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Therapy Appointment Summary System API is running",
+    status: "healthy"
+  });
+});
+
 // Capture all undefined paths
 app.use('*', (req, res, next) => {
   next(new AppError(`Route ${req.originalUrl} not found`, 404));
