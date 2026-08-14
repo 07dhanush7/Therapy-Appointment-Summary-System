@@ -66,8 +66,8 @@ async function seed() {
     // Insert sample data
     for (const item of sampleData) {
       const result = await db.query(
-        'INSERT INTO therapists (therapist_name, specialization, description, profile_image, experience_years, location, availability_status) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [item.name, item.specialization, item.description, item.profile_image, item.experience_years, item.location, item.availability_status]
+        'INSERT INTO therapists (therapist_name, specialization, description, profile_image, experience_years) VALUES (?, ?, ?, ?, ?)',
+        [item.name, item.specialization, item.description, item.profile_image, item.experience_years]
       );
       const therapistId = result.insertId;
       console.log(`Inserted Therapist: ${item.name} with ID: ${therapistId}`);

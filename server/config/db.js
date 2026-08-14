@@ -94,8 +94,8 @@ async function initializeDatabase() {
         description TEXT,
         profile_image TEXT,
         experience_years INT NOT NULL DEFAULT 5,
-        location VARCHAR(100) NOT NULL DEFAULT 'Unknown',
-        availability_status VARCHAR(100) NOT NULL DEFAULT 'Available Today',
+        location VARCHAR(100) NULL,
+        availability_status VARCHAR(100) NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       ) ENGINE=InnoDB;
     `);
@@ -162,16 +162,16 @@ async function initializeDatabase() {
       
       // Insert sample therapists
       const [t1] = await pool.query(
-        'INSERT INTO therapists (therapist_name, specialization, email, description, profile_image, experience_years, location, availability_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        ['Dr. Sarah Williams', 'Clinical Psychology', 'sarah@example.com', 'Specialist in evidence-based clinical interventions, anxiety disorders, and personality assessments.', '/images/sarah_williams.png', 12, 'Bangalore', 'Available Today']
+        'INSERT INTO therapists (therapist_name, specialization, email, description, profile_image, experience_years) VALUES (?, ?, ?, ?, ?, ?)',
+        ['Dr. Sarah Williams', 'Clinical Psychology', 'sarah@example.com', 'Specialist in evidence-based clinical interventions, anxiety disorders, and personality assessments.', '/images/sarah_williams.png', 12]
       );
       const [t2] = await pool.query(
-        'INSERT INTO therapists (therapist_name, specialization, email, description, profile_image, experience_years, location, availability_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        ['Dr. Michael Brown', 'Family Therapy', 'michael@example.com', 'Focuses on systemic family therapy, communication dynamics, and resolving conflict in relational systems.', '/images/michael_brown.png', 10, 'Chennai', 'Available Tomorrow']
+        'INSERT INTO therapists (therapist_name, specialization, email, description, profile_image, experience_years) VALUES (?, ?, ?, ?, ?, ?)',
+        ['Dr. Michael Brown', 'Family Therapy', 'michael@example.com', 'Focuses on systemic family therapy, communication dynamics, and resolving conflict in relational systems.', '/images/michael_brown.png', 10]
       );
       const [t3] = await pool.query(
-        'INSERT INTO therapists (therapist_name, specialization, email, description, profile_image, experience_years, location, availability_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        ['Dr. Evelyn Vance', 'Cognitive Behavioral Therapy (CBT)', 'evelyn@example.com', 'Focused on identifying and reframing cognitive distortions, exposure response prevention, and goal-oriented CBT plans.', '/images/evelyn_vance.png', 8, 'Hyderabad', 'Available Today']
+        'INSERT INTO therapists (therapist_name, specialization, email, description, profile_image, experience_years) VALUES (?, ?, ?, ?, ?, ?)',
+        ['Dr. Evelyn Vance', 'Cognitive Behavioral Therapy (CBT)', 'evelyn@example.com', 'Focused on identifying and reframing cognitive distortions, exposure response prevention, and goal-oriented CBT plans.', '/images/evelyn_vance.png', 8]
       );
 
       const id1 = t1.insertId;

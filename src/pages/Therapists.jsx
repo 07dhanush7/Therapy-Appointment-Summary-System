@@ -31,8 +31,6 @@ const Therapists = () => {
   const [bio, setBio] = useState('');
   const [avatar, setAvatar] = useState('');
   const [experienceYears, setExperienceYears] = useState(5);
-  const [location, setLocation] = useState('');
-  const [availabilityStatus, setAvailabilityStatus] = useState('Available Today');
 
   useEffect(() => {
     fetchTherapists();
@@ -60,8 +58,6 @@ const Therapists = () => {
     setBio('');
     setAvatar('');
     setExperienceYears(5);
-    setLocation('');
-    setAvailabilityStatus('Available Today');
     setIsModalOpen(true);
   };
 
@@ -72,8 +68,6 @@ const Therapists = () => {
     setBio(therapist.bio);
     setAvatar(therapist.avatar || '');
     setExperienceYears(therapist.experienceYears || 5);
-    setLocation(therapist.location || '');
-    setAvailabilityStatus(therapist.availabilityStatus || 'Available Today');
     setIsModalOpen(true);
   };
 
@@ -91,9 +85,7 @@ const Therapists = () => {
         specialty,
         bio,
         avatar: avatarUrl,
-        experienceYears: parseInt(experienceYears),
-        location,
-        availabilityStatus
+        experienceYears: parseInt(experienceYears)
       };
       if (editingTherapist) {
         await api.updateTherapist(editingTherapist.id, payload);
@@ -461,32 +453,6 @@ const Therapists = () => {
                 className="form-input"
                 required
               />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Location (City)</label>
-              <input
-                type="text"
-                placeholder="e.g. Bangalore"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                className="form-input"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Availability Status</label>
-              <select
-                value={availabilityStatus}
-                onChange={(e) => setAvailabilityStatus(e.target.value)}
-                className="form-select"
-                required
-              >
-                <option value="Available Today">Available Today</option>
-                <option value="Available Tomorrow">Available Tomorrow</option>
-                <option value="Not Available">Not Available</option>
-              </select>
             </div>
 
             <div className="form-group full-width">
