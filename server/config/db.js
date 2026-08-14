@@ -20,12 +20,24 @@ async function initializeDatabase() {
     // 1. Create a connection without DB name to check/create the DB
     let tempConnection;
     try {
-      tempConnection = await mysql.createConnection(dbConfig);
+      tempConnection = await mysql.createConnection({
+        ...dbConfig,
+        ssl: {
+          minVersion: 'TLSv1.2',
+          rejectUnauthorized: true
+        }
+      });
     } catch (connErr) {
       if (connErr.code === 'ER_ACCESS_DENIED_ERROR' && dbConfig.password !== '') {
         console.warn('Access denied with configured password. Falling back to blank password...');
         dbConfig.password = '';
-        tempConnection = await mysql.createConnection(dbConfig);
+        tempConnection = await mysql.createConnection({
+          ...dbConfig,
+          ssl: {
+            minVersion: 'TLSv1.2',
+            rejectUnauthorized: true
+          }
+        });
       } else {
         throw connErr;
       }
@@ -39,7 +51,11 @@ async function initializeDatabase() {
       database: dbName,
       waitForConnections: true,
       connectionLimit: 10,
-      queueLimit: 0
+      queueLimit: 0,
+      ssl: {
+        minVersion: 'TLSv1.2',
+        rejectUnauthorized: true
+      }
     });
 
     // 3. Test pool connection
