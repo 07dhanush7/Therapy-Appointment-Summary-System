@@ -1,13 +1,31 @@
 import axios from 'axios';
 
-// Production-ready API service connecting to Express backend on Render (fallback to localhost:5000 in dev)
-const BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000/api' : 'https://therapy-appointment-summary-system.onrender.com/api');
+// Production-ready API service connecting to Express backend
+let rawBaseUrl = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000/api' : 'https://therapy-appointment-summary-system.onrender.com/api');
+
+// Auto-correct baseURL to ensure it always includes the /api suffix even if misconfigured in environment variables
+if (rawBaseUrl && !rawBaseUrl.endsWith('/api') && !rawBaseUrl.endsWith('/api/')) {
+  rawBaseUrl = rawBaseUrl.replace(/\/+$/, '') + '/api';
+}
+
+const BASE_URL = rawBaseUrl;
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
   headers: {
     'Content-Type': 'application/json'
   }
+});
+
+// Axios request interceptor to log URLs for debugging environment routing
+axiosInstance.interceptors.request.use(config => {
+  const fullUrl = (config.baseURL || '') + config.url;
+  console.log("BASE_URL:", config.baseURL);
+  console.log("Request URL:", config.url);
+  console.log("Full Resolved Request URL:", fullUrl);
+  return config;
+}, error => {
+  return Promise.reject(error);
 });
 
 export const api = {

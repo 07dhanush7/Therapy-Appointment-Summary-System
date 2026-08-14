@@ -16,6 +16,12 @@ const PORT = process.env.PORT || 5000;
 // Enable CORS for frontend connectivity
 app.use(cors());
 
+// Log incoming requests for debugging
+app.use((req, res, next) => {
+  console.log(req.method, req.originalUrl);
+  next();
+});
+
 // Enable JSON Parsing for request bodies
 app.use(express.json());
 
