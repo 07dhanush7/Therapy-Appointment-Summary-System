@@ -89,6 +89,7 @@ async function initializeDatabase() {
         therapist_id INT AUTO_INCREMENT PRIMARY KEY,
         therapist_name VARCHAR(100) NOT NULL,
         specialization VARCHAR(255) NOT NULL,
+        email VARCHAR(255),
         description TEXT,
         profile_image TEXT,
         experience_years INT NOT NULL DEFAULT 5,
@@ -97,6 +98,20 @@ async function initializeDatabase() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       ) ENGINE=InnoDB;
     `);
+
+    // 5b. Migrate existing therapists table to add email column if missing
+    try {
+      const [columns] = await pool.query('SHOW COLUMNS FROM therapists LIKE "email"');
+      if (columns.length === 0) {
+        console.log('Migrating therapists table: Adding email column...');
+        await pool.query(`
+          ALTER TABLE therapists 
+          ADD COLUMN email VARCHAR(255)
+        `);
+      }
+    } catch (e) {
+      console.error('Migration warning for therapists table email:', e.message);
+    }
 
     await pool.query(`
       CREATE TABLE IF NOT EXISTS appointments (

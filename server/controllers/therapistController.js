@@ -8,9 +8,17 @@ const { AppError } = require('../middleware/errorHandler');
 exports.getAllTherapists = async (req, res, next) => {
   try {
     const therapists = await db.query('SELECT * FROM therapists ORDER BY therapist_id ASC');
+    
+    // Map response to include aliases for both frontend (therapist_id) and standard formats (id)
+    const mapped = therapists.map(t => ({
+      ...t,
+      id: t.therapist_id,
+      name: t.therapist_name
+    }));
+
     res.status(200).json({
       success: true,
-      data: therapists
+      data: mapped
     });
   } catch (error) {
     next(error);
@@ -30,9 +38,16 @@ exports.getTherapistById = async (req, res, next) => {
       return next(new AppError(`Therapist with ID ${id} not found`, 404));
     }
 
+    const t = therapists[0];
+    const mapped = {
+      ...t,
+      id: t.therapist_id,
+      name: t.therapist_name
+    };
+
     res.status(200).json({
       success: true,
-      data: therapists[0]
+      data: mapped
     });
   } catch (error) {
     next(error);
@@ -45,18 +60,27 @@ exports.getTherapistById = async (req, res, next) => {
  */
 exports.createTherapist = async (req, res, next) => {
   try {
-    const { therapist_name, specialization, description, profile_image, experience_years, location, availability_status } = req.body;
+    console.log('Request received to create therapist. Body:', req.body);
+
+    const { name, therapist_name, specialization, email, description, profile_image, experience_years, location, availability_status } = req.body;
+
+    // Use name as fallback for therapist_name, and vice versa
+    const finalName = (therapist_name || name || '').trim();
+    const finalSpec = (specialization || '').trim();
+    const finalEmail = (email || '').trim();
+
+    console.log(`Data validated. Name: "${finalName}", Specialization: "${finalSpec}", Email: "${finalEmail}"`);
 
     // Validation: Required and not whitespace-only
-    if (!therapist_name || typeof therapist_name !== 'string' || therapist_name.trim() === '') {
+    if (!finalName) {
+      console.warn('Validation failed: Name is empty or invalid.');
       return res.status(400).json({ success: false, message: 'Validation error' });
     }
-    if (!specialization || typeof specialization !== 'string' || specialization.trim() === '') {
+    if (!finalSpec) {
+      console.warn('Validation failed: Specialization is empty or invalid.');
       return res.status(400).json({ success: false, message: 'Validation error' });
     }
 
-    const trimmedName = therapist_name.trim();
-    const trimmedSpec = specialization.trim();
     const trimmedDesc = description ? description.trim() : '';
     const trimmedImg = profile_image ? profile_image.trim() : '';
     const expVal = experience_years !== undefined ? parseInt(experience_years) : 5;
@@ -66,16 +90,21 @@ exports.createTherapist = async (req, res, next) => {
     // Check for duplicate therapist name (case-insensitive)
     const duplicate = await db.query(
       'SELECT * FROM therapists WHERE LOWER(therapist_name) = LOWER(?)',
-      [trimmedName]
+      [finalName]
     );
     if (duplicate.length > 0) {
+      console.warn(`Validation failed: Duplicate therapist name "${finalName}" found.`);
       return res.status(400).json({ success: false, message: 'Validation error' });
     }
 
+    console.log('Database insert started...');
     const result = await db.query(
-      'INSERT INTO therapists (therapist_name, specialization, description, profile_image, experience_years, location, availability_status) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [trimmedName, trimmedSpec, trimmedDesc, trimmedImg, expVal, locVal, availVal]
+      'INSERT INTO therapists (therapist_name, specialization, email, description, profile_image, experience_years, location, availability_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [finalName, finalSpec, finalEmail, trimmedDesc, trimmedImg, expVal, locVal, availVal]
     );
+
+    console.log('Database insert successful. Result:', result);
+    console.log('Insert ID returned:', result.insertId);
 
     // Log Activity
     await db.logActivity('Therapist Added', 'Therapist Added');
@@ -84,9 +113,12 @@ exports.createTherapist = async (req, res, next) => {
       success: true,
       message: 'Therapist created successfully',
       data: {
+        id: result.insertId,
         therapist_id: result.insertId,
-        therapist_name: trimmedName,
-        specialization: trimmedSpec,
+        name: finalName,
+        therapist_name: finalName,
+        specialization: finalSpec,
+        email: finalEmail,
         description: trimmedDesc,
         profile_image: trimmedImg,
         experience_years: expVal,
@@ -95,6 +127,7 @@ exports.createTherapist = async (req, res, next) => {
       }
     });
   } catch (error) {
+    console.error('Error creating therapist:', error);
     next(error);
   }
 };
@@ -106,7 +139,7 @@ exports.createTherapist = async (req, res, next) => {
 exports.updateTherapist = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { therapist_name, specialization, description, profile_image, experience_years, location, availability_status } = req.body;
+    const { name, therapist_name, specialization, email, description, profile_image, experience_years, location, availability_status } = req.body;
 
     // Verify therapist exists
     const therapists = await db.query('SELECT * FROM therapists WHERE therapist_id = ?', [id]);
@@ -115,8 +148,9 @@ exports.updateTherapist = async (req, res, next) => {
     }
 
     const existing = therapists[0];
-    const nameVal = therapist_name !== undefined ? therapist_name : existing.therapist_name;
+    const nameVal = therapist_name !== undefined ? therapist_name : (name !== undefined ? name : existing.therapist_name);
     const specVal = specialization !== undefined ? specialization : existing.specialization;
+    const emailVal = email !== undefined ? email : existing.email;
     const descVal = description !== undefined ? description : existing.description;
     const imgVal = profile_image !== undefined ? profile_image : existing.profile_image;
     const expVal = experience_years !== undefined ? parseInt(experience_years) : existing.experience_years;
@@ -133,6 +167,7 @@ exports.updateTherapist = async (req, res, next) => {
 
     const trimmedName = nameVal.trim();
     const trimmedSpec = specVal.trim();
+    const trimmedEmail = emailVal ? emailVal.trim() : '';
     const trimmedDesc = descVal ? descVal.trim() : '';
     const trimmedImg = imgVal ? imgVal.trim() : '';
     const trimmedLoc = typeof locVal === 'string' ? locVal.trim() : 'Unknown';
@@ -148,8 +183,8 @@ exports.updateTherapist = async (req, res, next) => {
     }
 
     await db.query(
-      'UPDATE therapists SET therapist_name = ?, specialization = ?, description = ?, profile_image = ?, experience_years = ?, location = ?, availability_status = ? WHERE therapist_id = ?',
-      [trimmedName, trimmedSpec, trimmedDesc, trimmedImg, expVal, trimmedLoc, trimmedAvail, id]
+      'UPDATE therapists SET therapist_name = ?, specialization = ?, email = ?, description = ?, profile_image = ?, experience_years = ?, location = ?, availability_status = ? WHERE therapist_id = ?',
+      [trimmedName, trimmedSpec, trimmedEmail, trimmedDesc, trimmedImg, expVal, trimmedLoc, trimmedAvail, id]
     );
 
     // Log Activity
@@ -159,9 +194,12 @@ exports.updateTherapist = async (req, res, next) => {
       success: true,
       message: 'Therapist updated successfully',
       data: {
+        id: parseInt(id),
         therapist_id: parseInt(id),
+        name: trimmedName,
         therapist_name: trimmedName,
         specialization: trimmedSpec,
+        email: trimmedEmail,
         description: trimmedDesc,
         profile_image: trimmedImg,
         experience_years: expVal,
