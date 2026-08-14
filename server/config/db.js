@@ -2,17 +2,12 @@ const mysql = require('mysql2/promise');
 require('dotenv').config();
 
 const dbConfig = {
-  host: process.env.DB_HOST,
-  port: parseInt(process.env.DB_PORT || '3306', 10),
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  waitForConnections: true,
-  connectionLimit: 5,
-  queueLimit: 0,
-  connectTimeout: 10000,
-  acquireTimeout: 10000
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD === 'YOUR_PASSWORD' ? '' : (process.env.DB_PASSWORD || '')
 };
+
+const dbName = process.env.DB_NAME || 'therapy_summary_db';
 
 let pool = null;
 
@@ -21,22 +16,36 @@ let pool = null;
  */
 async function initializeDatabase() {
   try {
-    console.log(`Connecting to FreeDB MySQL at ${dbConfig.host}:${dbConfig.port} as user ${dbConfig.user}...`);
-
-    // 1. Initialize the connection pool using the target database configuration
-    pool = mysql.createPool(dbConfig);
-
-    // 2. Test pool connection
-    let testConnection;
+    console.log(`Connecting to MySQL at ${dbConfig.host} as user ${dbConfig.user}...`);
+    // 1. Create a connection without DB name to check/create the DB
+    let tempConnection;
     try {
-      testConnection = await pool.getConnection();
-      testConnection.release();
-      console.log('✅ Connected to FreeDB MySQL Database');
+      tempConnection = await mysql.createConnection(dbConfig);
     } catch (connErr) {
-      console.error('❌ Failed to connect to FreeDB MySQL Database');
-      console.error(`Connection Error: ${connErr.code} - ${connErr.message}`);
-      throw connErr;
+      if (connErr.code === 'ER_ACCESS_DENIED_ERROR' && dbConfig.password !== '') {
+        console.warn('Access denied with configured password. Falling back to blank password...');
+        dbConfig.password = '';
+        tempConnection = await mysql.createConnection(dbConfig);
+      } else {
+        throw connErr;
+      }
     }
+    await tempConnection.query(`CREATE DATABASE IF NOT EXISTS \`${dbName}\``);
+    await tempConnection.end();
+
+    // 2. Initialize the connection pool using the target database
+    pool = mysql.createPool({
+      ...dbConfig,
+      database: dbName,
+      waitForConnections: true,
+      connectionLimit: 10,
+      queueLimit: 0
+    });
+
+    // 3. Test pool connection
+    const testConnection = await pool.getConnection();
+    testConnection.release();
+    console.log(`Successfully connected to database: ${dbName}`);
 
     // 4. Check if we need to migrate/recreate tables (e.g. if the therapists table lacks new columns)
     let dropNeeded = false;
@@ -119,7 +128,6 @@ async function initializeDatabase() {
     console.log('Database tables verified/created successfully.');
     return pool;
   } catch (error) {
-    console.error('❌ Failed to connect to FreeDB MySQL Database');
     console.error('Failed to initialize database:', error.message);
     throw error;
   }
@@ -146,21 +154,10 @@ module.exports = {
   getPool: () => pool,
   query: async (sql, params) => {
     if (!pool) {
-      const err = new Error('Database pool is not initialized. Call initializeDatabase() first.');
-      console.error('❌ Database query failed: Pool not initialized.');
-      throw err;
+      throw new Error('Database pool is not initialized. Call initializeDatabase() first.');
     }
-    const startTime = Date.now();
-    try {
-      console.log(`[DB Query Executed] SQL: ${sql} | Params: ${JSON.stringify(params || [])}`);
-      const [results] = await pool.query(sql, params);
-      const duration = Date.now() - startTime;
-      console.log(`[DB Query Success] Execution time: ${duration}ms`);
-      return results;
-    } catch (error) {
-      console.error(`❌ [DB Query Error] SQL: ${sql} | Error: ${error.message}`);
-      throw error;
-    }
+    const [results] = await pool.query(sql, params);
+    return results;
   },
   logActivity
 };
