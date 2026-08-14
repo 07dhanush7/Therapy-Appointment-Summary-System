@@ -5,11 +5,11 @@ const upload = require('../middleware/upload');
 
 router.route('/')
   .get(therapistController.getAllTherapists)
-  .post(upload.single('profile_image'), therapistController.createTherapist);
+  .post(upload.single('profileImage'), therapistController.createTherapist);
 
 router.route('/:id')
   .get(therapistController.getTherapistById)
-  .put(upload.single('profile_image'), therapistController.updateTherapist)
+  .put(upload.single('profileImage'), therapistController.updateTherapist)
   .delete(therapistController.deleteTherapist);
 
 module.exports = router;

@@ -71,11 +71,11 @@ export const api = {
     const formData = new FormData();
     formData.append('therapist_name', therapistData.name);
     formData.append('specialization', therapistData.specialty);
-    formData.append('description', therapistData.bio || '');
+    formData.append('biography', therapistData.bio || '');
     formData.append('experience_years', therapistData.experienceYears);
     
     if (therapistData.avatar) {
-      formData.append('profile_image', therapistData.avatar);
+      formData.append('profileImage', therapistData.avatar);
     }
 
     const res = await axiosInstance.post('/therapists', formData, {
@@ -98,11 +98,11 @@ export const api = {
     const formData = new FormData();
     formData.append('therapist_name', updatedData.name);
     formData.append('specialization', updatedData.specialty);
-    formData.append('description', updatedData.bio || '');
+    formData.append('biography', updatedData.bio || '');
     formData.append('experience_years', updatedData.experienceYears);
     
     if (updatedData.avatar) {
-      formData.append('profile_image', updatedData.avatar);
+      formData.append('profileImage', updatedData.avatar);
     }
 
     const res = await axiosInstance.put(`/therapists/${id}`, formData, {

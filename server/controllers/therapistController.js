@@ -64,37 +64,37 @@ exports.getTherapistById = async (req, res, next) => {
  */
 exports.createTherapist = async (req, res, next) => {
   try {
-    console.log('Request received to create therapist. Body:', req.body);
-    if (req.file) {
-      console.log('Uploaded image file details:', req.file);
-    }
+    console.log(req.body);
+    console.log(req.file);
 
-    const { name, therapist_name, specialization, email, description, profile_image, experience_years } = req.body;
+    const { name, therapist_name, specialization, email, description, biography, profile_image, profileImage, experience_years } = req.body;
 
     // Use name as fallback for therapist_name, and vice versa
     const finalName = (therapist_name || name || '').trim();
     const finalSpec = (specialization || '').trim();
     const finalEmail = (email || '').trim();
+    const finalDesc = (biography || description || '').trim();
 
     console.log(`Data validated. Name: "${finalName}", Specialization: "${finalSpec}", Email: "${finalEmail}"`);
 
     // Validation: Required and not whitespace-only
     if (!finalName) {
       console.warn('Validation failed: Name is empty or invalid.');
-      return res.status(400).json({ success: false, message: 'Validation error' });
+      return res.status(400).json({ success: false, message: 'Name is required' });
     }
     if (!finalSpec) {
       console.warn('Validation failed: Specialization is empty or invalid.');
-      return res.status(400).json({ success: false, message: 'Validation error' });
+      return res.status(400).json({ success: false, message: 'Specialty is required' });
     }
 
-    const trimmedDesc = description ? description.trim() : '';
     const expVal = experience_years !== undefined ? parseInt(experience_years) : 5;
 
     // Image Upload Handling
     let profileImageUrl = 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=300';
     if (req.file) {
       profileImageUrl = '/uploads/' + req.file.filename;
+    } else if (profileImage) {
+      profileImageUrl = profileImage;
     } else if (profile_image) {
       profileImageUrl = profile_image;
     }
@@ -106,13 +106,13 @@ exports.createTherapist = async (req, res, next) => {
     );
     if (duplicate.length > 0) {
       console.warn(`Validation failed: Duplicate therapist name "${finalName}" found.`);
-      return res.status(400).json({ success: false, message: 'Validation error' });
+      return res.status(400).json({ success: false, message: 'A therapist with this name already exists' });
     }
 
     console.log('Database insert started...');
     const result = await db.query(
       'INSERT INTO therapists (therapist_name, specialization, email, description, profile_image, experience_years) VALUES (?, ?, ?, ?, ?, ?)',
-      [finalName, finalSpec, finalEmail, trimmedDesc, profileImageUrl, expVal]
+      [finalName, finalSpec, finalEmail, finalDesc, profileImageUrl, expVal]
     );
 
     console.log('Database insert successful. Result:', result);
@@ -131,13 +131,13 @@ exports.createTherapist = async (req, res, next) => {
         therapist_name: finalName,
         specialization: finalSpec,
         email: finalEmail,
-        description: trimmedDesc,
+        description: finalDesc,
         profile_image: profileImageUrl,
         experience_years: expVal
       }
     });
   } catch (error) {
-    console.error('Error creating therapist:', error);
+    console.error(error);
     next(error);
   }
 };
@@ -148,8 +148,11 @@ exports.createTherapist = async (req, res, next) => {
  */
 exports.updateTherapist = async (req, res, next) => {
   try {
+    console.log(req.body);
+    console.log(req.file);
+
     const { id } = req.params;
-    const { name, therapist_name, specialization, email, description, profile_image, experience_years } = req.body;
+    const { name, therapist_name, specialization, email, description, biography, profile_image, profileImage, experience_years } = req.body;
 
     // Verify therapist exists
     const therapists = await db.query('SELECT * FROM therapists WHERE therapist_id = ?', [id]);
@@ -161,23 +164,25 @@ exports.updateTherapist = async (req, res, next) => {
     const nameVal = therapist_name !== undefined ? therapist_name : (name !== undefined ? name : existing.therapist_name);
     const specVal = specialization !== undefined ? specialization : existing.specialization;
     const emailVal = email !== undefined ? email : existing.email;
-    const descVal = description !== undefined ? description : existing.description;
+    const descVal = biography !== undefined ? biography : (description !== undefined ? description : existing.description);
     const expVal = experience_years !== undefined ? parseInt(experience_years) : existing.experience_years;
 
     // Image Upload Handling
     let profileImageUrl = existing.profile_image;
     if (req.file) {
       profileImageUrl = '/uploads/' + req.file.filename;
+    } else if (profileImage !== undefined) {
+      profileImageUrl = profileImage;
     } else if (profile_image !== undefined) {
       profileImageUrl = profile_image;
     }
 
     // Validation: Required and not whitespace-only
     if (!nameVal || typeof nameVal !== 'string' || nameVal.trim() === '') {
-      return res.status(400).json({ success: false, message: 'Validation error' });
+      return res.status(400).json({ success: false, message: 'Name is required' });
     }
     if (!specVal || typeof specVal !== 'string' || specVal.trim() === '') {
-      return res.status(400).json({ success: false, message: 'Validation error' });
+      return res.status(400).json({ success: false, message: 'Specialty is required' });
     }
 
     const trimmedName = nameVal.trim();
@@ -191,7 +196,7 @@ exports.updateTherapist = async (req, res, next) => {
       [trimmedName, id]
     );
     if (duplicate.length > 0) {
-      return res.status(400).json({ success: false, message: 'Validation error' });
+      return res.status(400).json({ success: false, message: 'A therapist with this name already exists' });
     }
 
     await db.query(
@@ -218,6 +223,7 @@ exports.updateTherapist = async (req, res, next) => {
       }
     });
   } catch (error) {
+    console.error(error);
     next(error);
   }
 };

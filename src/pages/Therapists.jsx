@@ -110,6 +110,17 @@ const Therapists = () => {
       return;
     }
 
+    // Prepare and log FormData for audit
+    const loggedFormData = new FormData();
+    loggedFormData.append('therapist_name', name);
+    loggedFormData.append('specialization', specialty);
+    loggedFormData.append('biography', bio || '');
+    loggedFormData.append('experience_years', experienceYears);
+    if (avatar) {
+      loggedFormData.append('profileImage', avatar);
+    }
+    console.log(loggedFormData);
+
     try {
       const payload = {
         name,
@@ -127,15 +138,10 @@ const Therapists = () => {
       }
       setIsModalOpen(false);
       fetchTherapists();
-    } catch (err) {
-      console.error('Error saving therapist:', err);
-      if (err.response && err.response.status === 400) {
-        showToast('Validation Failed', 'error');
-      } else if (err.response) {
-        showToast('Server Error', 'error');
-      } else {
-        showToast('Network Error', 'error');
-      }
+    } catch (error) {
+      console.error(error.response?.data || error);
+      const errorMessage = error.response?.data?.message || 'Profile Creation Failed';
+      showToast(errorMessage, 'error');
     }
   };
 
