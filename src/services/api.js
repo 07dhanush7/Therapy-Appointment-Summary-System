@@ -11,10 +11,7 @@ if (rawBaseUrl && !rawBaseUrl.endsWith('/api') && !rawBaseUrl.endsWith('/api/'))
 const BASE_URL = rawBaseUrl;
 
 const axiosInstance = axios.create({
-  baseURL: BASE_URL,
-  headers: {
-    'Content-Type': 'application/json'
-  }
+  baseURL: BASE_URL
 });
 
 // Axios request interceptor to log URLs for debugging environment routing
@@ -76,13 +73,11 @@ export const api = {
     
     if (therapistData.avatar) {
       formData.append('profileImage', therapistData.avatar);
+    } else {
+      formData.append('profileImage', '');
     }
 
-    const res = await axiosInstance.post('/therapists', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
+    const res = await axiosInstance.post('/therapists', formData);
     const t = res.data.data;
     return {
       id: t.therapist_id,
@@ -103,13 +98,11 @@ export const api = {
     
     if (updatedData.avatar) {
       formData.append('profileImage', updatedData.avatar);
+    } else {
+      formData.append('profileImage', '');
     }
 
-    const res = await axiosInstance.put(`/therapists/${id}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
+    const res = await axiosInstance.put(`/therapists/${id}`, formData);
     const t = res.data.data;
     return {
       id: t.therapist_id,

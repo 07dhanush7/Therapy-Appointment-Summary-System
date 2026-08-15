@@ -1,5 +1,7 @@
 const db = require('../config/db');
 const { AppError } = require('../middleware/errorHandler');
+const fs = require('fs');
+const { uploadToCloudinary } = require('../services/cloudinary');
 
 /**
  * Get all therapists.
@@ -64,49 +66,62 @@ exports.getTherapistById = async (req, res, next) => {
  */
 exports.createTherapist = async (req, res, next) => {
   try {
-    console.log(req.body);
-    console.log(req.file);
+    console.log('[Create Therapist Request Body]', req.body);
+    console.log('[Create Therapist Request File]', req.file);
 
     const { name, therapist_name, specialization, email, description, biography, profile_image, profileImage, experience_years } = req.body;
 
-    // Use name as fallback for therapist_name, and vice versa
     const finalName = (therapist_name || name || '').trim();
     const finalSpec = (specialization || '').trim();
     const finalEmail = (email || '').trim();
     const finalDesc = (biography || description || '').trim();
 
-    console.log(`Data validated. Name: "${finalName}", Specialization: "${finalSpec}", Email: "${finalEmail}"`);
-
-    // Validation: Required and not whitespace-only
+    // 1. Validation: Required and not whitespace-only
     if (!finalName) {
-      console.warn('Validation failed: Name is empty or invalid.');
+      if (req.file) fs.unlink(req.file.path, () => {});
       return res.status(400).json({ success: false, message: 'Name is required' });
     }
     if (!finalSpec) {
-      console.warn('Validation failed: Specialization is empty or invalid.');
+      if (req.file) fs.unlink(req.file.path, () => {});
       return res.status(400).json({ success: false, message: 'Specialty is required' });
     }
 
-    const expVal = experience_years !== undefined ? parseInt(experience_years) : 5;
-
-    // Image Upload Handling
-    let profileImageUrl = 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=300';
-    if (req.file) {
-      profileImageUrl = '/uploads/' + req.file.filename;
-    } else if (profileImage) {
-      profileImageUrl = profileImage;
-    } else if (profile_image) {
-      profileImageUrl = profile_image;
-    }
-
-    // Check for duplicate therapist name (case-insensitive)
+    // 2. Duplicate Validation (Case-insensitive check before Cloudinary upload)
     const duplicate = await db.query(
       'SELECT * FROM therapists WHERE LOWER(therapist_name) = LOWER(?)',
       [finalName]
     );
     if (duplicate.length > 0) {
-      console.warn(`Validation failed: Duplicate therapist name "${finalName}" found.`);
+      if (req.file) fs.unlink(req.file.path, () => {});
       return res.status(400).json({ success: false, message: 'A therapist with this name already exists' });
+    }
+
+    const expVal = experience_years !== undefined ? parseInt(experience_years) : 5;
+
+    // 3. Image Upload Handling (Cloudinary with local fallback)
+    let profileImageUrl = 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=300';
+    if (req.file) {
+      try {
+        const cloudinaryUrl = await uploadToCloudinary(req.file.path);
+        if (cloudinaryUrl) {
+          profileImageUrl = cloudinaryUrl;
+          // Delete local file after upload
+          fs.unlink(req.file.path, (err) => {
+            if (err) console.error('Error deleting temp file:', err);
+          });
+        } else {
+          // Fallback to local uploads path if Cloudinary is not configured
+          profileImageUrl = '/uploads/' + req.file.filename;
+        }
+      } catch (err) {
+        // Cleanup file on upload error
+        fs.unlink(req.file.path, () => {});
+        return next(err);
+      }
+    } else if (profileImage) {
+      profileImageUrl = profileImage;
+    } else if (profile_image) {
+      profileImageUrl = profile_image;
     }
 
     console.log('Database insert started...');
@@ -116,7 +131,6 @@ exports.createTherapist = async (req, res, next) => {
     );
 
     console.log('Database insert successful. Result:', result);
-    console.log('Insert ID returned:', result.insertId);
 
     // Log Activity
     await db.logActivity('Therapist Added', 'Therapist Added');
@@ -137,6 +151,7 @@ exports.createTherapist = async (req, res, next) => {
       }
     });
   } catch (error) {
+    if (req.file) fs.unlink(req.file.path, () => {});
     console.error(error);
     next(error);
   }
@@ -148,8 +163,8 @@ exports.createTherapist = async (req, res, next) => {
  */
 exports.updateTherapist = async (req, res, next) => {
   try {
-    console.log(req.body);
-    console.log(req.file);
+    console.log('[Update Therapist Request Body]', req.body);
+    console.log('[Update Therapist Request File]', req.file);
 
     const { id } = req.params;
     const { name, therapist_name, specialization, email, description, biography, profile_image, profileImage, experience_years } = req.body;
@@ -157,6 +172,7 @@ exports.updateTherapist = async (req, res, next) => {
     // Verify therapist exists
     const therapists = await db.query('SELECT * FROM therapists WHERE therapist_id = ?', [id]);
     if (therapists.length === 0) {
+      if (req.file) fs.unlink(req.file.path, () => {});
       return next(new AppError(`Therapist with ID ${id} not found`, 404));
     }
 
@@ -167,21 +183,13 @@ exports.updateTherapist = async (req, res, next) => {
     const descVal = biography !== undefined ? biography : (description !== undefined ? description : existing.description);
     const expVal = experience_years !== undefined ? parseInt(experience_years) : existing.experience_years;
 
-    // Image Upload Handling
-    let profileImageUrl = existing.profile_image;
-    if (req.file) {
-      profileImageUrl = '/uploads/' + req.file.filename;
-    } else if (profileImage !== undefined) {
-      profileImageUrl = profileImage;
-    } else if (profile_image !== undefined) {
-      profileImageUrl = profile_image;
-    }
-
-    // Validation: Required and not whitespace-only
+    // 1. Validation: Required and not whitespace-only
     if (!nameVal || typeof nameVal !== 'string' || nameVal.trim() === '') {
+      if (req.file) fs.unlink(req.file.path, () => {});
       return res.status(400).json({ success: false, message: 'Name is required' });
     }
     if (!specVal || typeof specVal !== 'string' || specVal.trim() === '') {
+      if (req.file) fs.unlink(req.file.path, () => {});
       return res.status(400).json({ success: false, message: 'Specialty is required' });
     }
 
@@ -190,13 +198,40 @@ exports.updateTherapist = async (req, res, next) => {
     const trimmedEmail = emailVal ? emailVal.trim() : '';
     const trimmedDesc = descVal ? descVal.trim() : '';
 
-    // Check for duplicate therapist name for a different ID (case-insensitive)
+    // 2. Duplicate Validation (Case-insensitive check before Cloudinary upload)
     const duplicate = await db.query(
       'SELECT * FROM therapists WHERE LOWER(therapist_name) = LOWER(?) AND therapist_id != ?',
       [trimmedName, id]
     );
     if (duplicate.length > 0) {
+      if (req.file) fs.unlink(req.file.path, () => {});
       return res.status(400).json({ success: false, message: 'A therapist with this name already exists' });
+    }
+
+    // 3. Image Upload Handling (Cloudinary with local fallback)
+    let profileImageUrl = existing.profile_image;
+    if (req.file) {
+      try {
+        const cloudinaryUrl = await uploadToCloudinary(req.file.path);
+        if (cloudinaryUrl) {
+          profileImageUrl = cloudinaryUrl;
+          // Delete local file after upload
+          fs.unlink(req.file.path, (err) => {
+            if (err) console.error('Error deleting temp file:', err);
+          });
+        } else {
+          // Fallback to local uploads path if Cloudinary is not configured
+          profileImageUrl = '/uploads/' + req.file.filename;
+        }
+      } catch (err) {
+        // Cleanup file on upload error
+        fs.unlink(req.file.path, () => {});
+        return next(err);
+      }
+    } else if (profileImage !== undefined) {
+      profileImageUrl = profileImage;
+    } else if (profile_image !== undefined) {
+      profileImageUrl = profile_image;
     }
 
     await db.query(
@@ -223,6 +258,7 @@ exports.updateTherapist = async (req, res, next) => {
       }
     });
   } catch (error) {
+    if (req.file) fs.unlink(req.file.path, () => {});
     console.error(error);
     next(error);
   }

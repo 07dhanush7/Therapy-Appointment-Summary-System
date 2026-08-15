@@ -43,6 +43,10 @@ const TherapistCard = ({ therapist, onEdit, onDelete }) => {
           <img
             src={therapist.avatar || 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=300'}
             alt={therapist.name}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=300';
+            }}
             style={{
               width: '60px',
               height: '60px',

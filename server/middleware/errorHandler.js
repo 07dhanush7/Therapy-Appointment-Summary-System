@@ -16,8 +16,16 @@ class AppError extends Error {
  * Express centralized error handling middleware.
  */
 function errorHandler(err, req, res, next) {
-  const statusCode = err.statusCode || 500;
-  const message = err.message || 'Internal Server Error';
+  let statusCode = err.statusCode || 500;
+  let message = err.message || 'Internal Server Error';
+
+  // Map file upload errors to correct status codes
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    statusCode = 413;
+    message = 'Image size exceeds the 5 MB limit';
+  } else if (message && (message.includes('Invalid file type') || message.includes('Only PNG, JPG, JPEG, and WEBP'))) {
+    statusCode = 415;
+  }
 
   // Log the error for internal visibility
   console.error(`[API Error] ${req.method} ${req.originalUrl} -> Status ${statusCode}: ${message}`);

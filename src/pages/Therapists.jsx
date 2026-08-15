@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, UserPlus, AlertCircle, ShieldAlert, Trash2 } from 'lucide-react';
 import { api } from '../services/api';
@@ -7,6 +7,7 @@ import Modal from '../components/Modal';
 import { useToast } from '../components/Toast';
 
 const Therapists = () => {
+  const fileInputRef = useRef(null);
   const [therapists, setTherapists] = useState([]);
   const [loading, setLoading] = useState(true);
   const { showToast } = useToast();
@@ -32,6 +33,7 @@ const Therapists = () => {
   const [avatar, setAvatar] = useState('');
   const [imagePreview, setImagePreview] = useState('');
   const [experienceYears, setExperienceYears] = useState(5);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -106,20 +108,16 @@ const Therapists = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name || !specialty) {
-      showToast('Validation Failed', 'error');
+      showToast('Validation Failed: Name and specialty are required', 'error');
       return;
     }
 
-    // Prepare and log FormData for audit
-    const loggedFormData = new FormData();
-    loggedFormData.append('therapist_name', name);
-    loggedFormData.append('specialization', specialty);
-    loggedFormData.append('biography', bio || '');
-    loggedFormData.append('experience_years', experienceYears);
-    if (avatar) {
-      loggedFormData.append('profileImage', avatar);
+    if (!editingTherapist && !avatar) {
+      showToast('Validation Failed: Profile Image is required', 'error');
+      return;
     }
-    console.log(loggedFormData);
+
+    setIsSubmitting(true);
 
     try {
       const payload = {
@@ -140,8 +138,10 @@ const Therapists = () => {
       fetchTherapists();
     } catch (error) {
       console.error(error.response?.data || error);
-      const errorMessage = error.response?.data?.message || 'Profile Creation Failed';
+      const errorMessage = error.response?.data?.message || error.message || 'Profile Creation Failed';
       showToast(errorMessage, 'error');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -496,27 +496,68 @@ const Therapists = () => {
               <label className="form-label">Profile Image {!editingTherapist && <span className="required">*</span>}</label>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap', marginTop: '4px' }}>
                 {imagePreview && (
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    style={{
-                      width: '56px',
-                      height: '56px',
-                      borderRadius: '50%',
-                      objectFit: 'cover',
-                      border: '2px solid var(--accent-sage)',
-                      boxShadow: '0 2px 8px rgba(35, 65, 47, 0.1)'
-                    }}
-                  />
+                  <div style={{ position: 'relative', display: 'inline-block' }}>
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=300';
+                      }}
+                      style={{
+                        width: '56px',
+                        height: '56px',
+                        borderRadius: '50%',
+                        objectFit: 'cover',
+                        border: '2px solid var(--accent-sage)',
+                        boxShadow: '0 2px 8px rgba(35, 65, 47, 0.1)'
+                      }}
+                    />
+                    <button
+                      type="button"
+                      disabled={isSubmitting}
+                      onClick={() => {
+                        setAvatar('');
+                        setImagePreview('');
+                        if (fileInputRef.current) {
+                          fileInputRef.current.value = '';
+                        }
+                      }}
+                      style={{
+                        position: 'absolute',
+                        top: '-6px',
+                        right: '-6px',
+                        background: 'var(--accent-rose)',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '50%',
+                        width: '20px',
+                        height: '20px',
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                        opacity: isSubmitting ? 0.6 : 1
+                      }}
+                      title="Remove Image"
+                    >
+                      ×
+                    </button>
+                  </div>
                 )}
                 <div style={{ flex: 1, minWidth: '200px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   <input
                     type="file"
+                    ref={fileInputRef}
                     accept=".png,.jpg,.jpeg,.webp"
+                    disabled={isSubmitting}
                     onChange={handleFileChange}
                     className="form-input"
-                    style={{ padding: '8px 12px', cursor: 'pointer' }}
-                    required={!editingTherapist}
+                    style={{ padding: '8px 12px', cursor: isSubmitting ? 'not-allowed' : 'pointer' }}
+                    required={!editingTherapist && !imagePreview}
                   />
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                     Supported formats: PNG, JPG, JPEG, WEBP. Max size: 5MB.
@@ -533,16 +574,26 @@ const Therapists = () => {
                 onChange={(e) => setBio(e.target.value)}
                 className="form-textarea"
                 rows={4}
+                disabled={isSubmitting}
               />
             </div>
           </div>
 
           <div className="form-footer">
-            <button type="button" onClick={() => setIsModalOpen(false)} className="btn-secondary-modern">
+            <button 
+              type="button" 
+              onClick={() => setIsModalOpen(false)} 
+              className="btn-secondary-modern"
+              disabled={isSubmitting}
+            >
               Cancel
             </button>
-            <button type="submit" className="btn-primary-modern">
-              {editingTherapist ? "Save Changes" : "Create Profile"}
+            <button 
+              type="submit" 
+              className="btn-primary-modern"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Saving..." : (editingTherapist ? "Save Changes" : "Create Profile")}
             </button>
           </div>
         </form>

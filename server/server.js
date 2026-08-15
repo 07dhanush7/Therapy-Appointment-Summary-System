@@ -15,7 +15,11 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Enable CORS for frontend connectivity
-app.use(cors());
+const frontendUrl = process.env.FRONTEND_URL;
+app.use(cors({
+  origin: frontendUrl ? [frontendUrl, 'http://localhost:5173', 'http://localhost:3000'] : '*',
+  credentials: true
+}));
 
 // Log incoming requests for debugging
 app.use((req, res, next) => {
