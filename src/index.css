@@ -232,11 +232,6 @@ h1, h2, h3, h4, h5, h6 {
   to { transform: rotate(360deg); }
 }
 
-.spin-icon {
-  display: inline-block;
-  animation: spin 1.2s linear infinite;
-}
-
 /* ==========================================================================
    Redesigned Modal & Forms Style System
    ========================================================================== */

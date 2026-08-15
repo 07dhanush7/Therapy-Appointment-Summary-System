@@ -184,7 +184,7 @@ const TherapistDetails = () => {
         color: 'var(--text-secondary)',
         gap: '16px'
       }}>
-        <LoadingSpinner />
+        <LoadingSpinner mode="details" />
         <p>Loading profile details...</p>
       </div>
     );
@@ -556,7 +556,7 @@ const TherapistDetails = () => {
                 marginTop: '32px'
               }}
             >
-              <LoadingSpinner />
+              <LoadingSpinner mode="summary" />
             </motion.div>
           )}
 
